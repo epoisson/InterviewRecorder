@@ -15,7 +15,7 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             wpfApp = container "WPF Application" "Desktop UI application" "C# .NET 9, WPF" "Desktop Application" {
 
                 # UI Components
-                mainWindow = component "MainWindow" "Main UI window: controls, live waveform, in-app playback" "WPF Window" "UI"
+                mainWindow = component "MainWindow" "Main UI window: menu (View/Device/Config), controls, live waveform, chunks grid, in-app playback" "WPF Window" "UI"
                 
                 # Orchestration Layer
                 recordingOrchestrator = component "RecordingOrchestrator" "Coordinates all recording operations and manages application state" "Service" "Orchestrator"
@@ -32,7 +32,6 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
                 # Audio Capture Implementations
                 microphoneCapture = component "MicrophoneCapture" "Captures audio from microphone" "IAudioCapture Implementation" "Audio"
                 loopbackCapture = component "LoopbackCapture" "Captures system audio via loopback" "IAudioCapture Implementation" "Audio"
-                mixedCapture = component "MixedCapture" "Captures both microphone and system audio" "IAudioCapture Implementation" "Audio"
                 
                 # Data Models
                 recordingSession = component "RecordingSession" "Session state and metadata" "Data Model" "Model"
@@ -44,7 +43,7 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
                 # Relationships - Orchestrator to Services
                 recordingOrchestrator -> audioCaptureEngine "Controls recording lifecycle" "Async methods"
                 recordingOrchestrator -> stateManager "Persists session state" "Async methods"
-                recordingOrchestrator -> fileManager "Creates directories" "Sync methods"
+                recordingOrchestrator -> fileManager "Creates directories, lists existing chunks, merges WAVs" "Sync/Async methods"
                 recordingOrchestrator -> recoveryManager "Checks for incomplete sessions" "Async methods"
                 recordingOrchestrator -> logManager "Logs events" "Async methods"
                 recordingOrchestrator -> configManager "Reads configuration" "Sync properties"
@@ -53,7 +52,6 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
                 # Relationships - AudioCaptureEngine
                 audioCaptureEngine -> microphoneCapture "Creates and controls" "Factory pattern"
                 audioCaptureEngine -> loopbackCapture "Creates and controls" "Factory pattern"
-                audioCaptureEngine -> mixedCapture "Creates and controls" "Factory pattern"
                 audioCaptureEngine -> fileManager "Gets chunk paths, merges WAV chunks" "Direct calls"
                 audioCaptureEngine -> ffmpegService "Queues each closed chunk for conversion" "Async calls"
                 audioCaptureEngine -> recordingOrchestrator "Raises peak levels for the waveform" "AudioPeak event"
@@ -81,7 +79,6 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
                 # NAudio Library Usage
                 microphoneCapture -> windowsOS "Captures from device" "NAudio WaveInEvent"
                 loopbackCapture -> windowsOS "Captures loopback" "NAudio WasapiLoopbackCapture"
-                mixedCapture -> windowsOS "Captures both sources" "NAudio WaveInEvent + WasapiLoopbackCapture"
 
                 # Audio delivery (used by the AudioDataFlow dynamic view)
                 windowsOS -> microphoneCapture "Delivers captured audio" "NAudio callback"
@@ -203,7 +200,6 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             include audioCaptureEngine
             include microphoneCapture
             include loopbackCapture
-            include mixedCapture
             include fileManager
             include ffmpegService
             include windowsOS
@@ -282,11 +278,13 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             mainWindow -> user "7. Show recovery prompt"
             user -> mainWindow "8. User confirms recovery"
             mainWindow -> recordingOrchestrator "9. RecoverSessionAsync()"
-            recordingOrchestrator -> audioCaptureEngine "10. InitializeForRecovery()"
-            recordingOrchestrator -> mainWindow "11. Raise StateChanged"
-            mainWindow -> user "12. Show recovered session"
+            recordingOrchestrator -> fileManager "10. List existing chunks on disk"
+            recordingOrchestrator -> audioCaptureEngine "11. InitializeForRecovery() (next chunk index)"
+            recordingOrchestrator -> ffmpegService "12. Re-queue chunks without an m4a"
+            recordingOrchestrator -> mainWindow "13. Raise StateChanged (Paused)"
+            mainWindow -> user "14. Show recovered session (paused)"
             autoLayout lr
-            description "Process of detecting and recovering from application crash"
+            description "Detect a crashed session, reopen it paused, and re-queue unconverted chunks. Resume continues at the next chunk; stop merges the existing chunks."
         }
         
         # Deployment View

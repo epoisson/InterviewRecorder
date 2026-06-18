@@ -74,7 +74,6 @@ namespace InterviewRecorder.Services
             {
                 AudioCaptureMode.InputDevice => new MicrophoneCapture(logManager, config),
                 AudioCaptureMode.Loopback => new LoopbackCapture(logManager, config),
-                AudioCaptureMode.Mix => new MixedCapture(logManager, config),
                 _ => throw new NotImplementedException()
             };
         }

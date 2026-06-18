@@ -16,7 +16,7 @@ namespace InterviewRecorder.Services
     /// </summary>
     public class ConfigurationManager
     {
-        // Shared so load and save agree: enums as strings ("Mix"), tolerant of casing.
+        // Shared so load and save agree: enums as strings ("InputDevice"), tolerant of casing.
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
             WriteIndented = true,

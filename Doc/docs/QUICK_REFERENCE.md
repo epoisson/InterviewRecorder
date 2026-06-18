@@ -27,7 +27,6 @@
 ├──────────────────────────────────┤
 │ • MicrophoneCapture              │
 │ • LoopbackCapture                │
-│ • MixedCapture                   │
 └──────────────────────────────────┘
 ```
 
@@ -59,28 +58,29 @@ User → MainWindow.StartButton_Click()
 ### Audio Data Flow
 ```
 Audio Device → IAudioCapture.DataAvailable
-  → AudioCaptureEngine.OnDataAvailable()
-    → Write to chunk file
-    → Check chunk duration (every 5 min)
-      → Close current chunk
-      → Queue for FFmpeg compression
-      → Create new chunk
-    → Check auto-save interval (every 30 sec)
-      → StateManager.SaveStateAsync()
+  → AudioCaptureEngine.OnCaptureDataAvailable()
+    → Write bytes to current chunk
+    → Raise AudioPeak (waveform)
+    → If elapsed >= ChunkDurationMinutes:
+      → Close current chunk (raise ChunkClosed) → save state
+      → Open next chunk (raise ChunkStarted)
+      → Queue closed chunk for FFmpeg conversion
 ```
+
+(No auto-save loop; state is saved per chunk close.)
 
 ### Recording Stop Flow
 ```
 User → MainWindow.StopButton_Click()
   → RecordingOrchestrator.StopRecordingAsync()
-    → AudioCaptureEngine.StopRecording()
+    → AudioCaptureEngine.StopRecording()  (final chunk closed + queued)
     → Stop duration timer
-    → FFmpegService.Stop() (wait for queue)
-    → FileManager.MergeChunksAsync()
-      → Read all chunk files
-      → Write merged WAV file
-    → StateManager.MarkSessionCompleteAsync()
-    → Return final file path
+    → FFmpegService.Stop()  (drain the conversion queue)
+    → FileManager.MergeChunksAsync()  (merge WAV chunks; skip unreadable ones)
+    → FFmpegService.MergeToM4a()  (concat m4a chunks)
+    → StateManager.MarkSessionCompleteAsync()  (.completed marker)
+    → Raise RecordingMerged (merged-file grid row)
+    → Return final WAV path
   → MainWindow shows completion dialog
 ```
 
@@ -97,9 +97,12 @@ Application Startup
     → Show recovery dialog to user
     → If user confirms:
       → RecordingOrchestrator.RecoverSessionAsync()
-        → Load session state
-        → Initialize AudioCaptureEngine
-        → Update UI
+        → Load session state (keep session id)
+        → Rebuild ChunkFiles from disk
+        → InitializeForRecovery (next chunk index)
+        → Re-queue any chunk missing its m4a
+        → Enter Paused state, update UI
+      → Resume continues at the next chunk, or Stop merges existing chunks
 ```
 
 ## State Machine
@@ -129,13 +132,15 @@ My Documents/
     ├── abc123-session-id/
     │   ├── chunks/
     │   │   ├── chunk_0000.wav
-    │   │   ├── chunk_0000.mp3
+    │   │   ├── chunk_0000.m4a
     │   │   ├── chunk_0001.wav
-    │   │   ├── chunk_0001.mp3
+    │   │   ├── chunk_0001.m4a
     │   │   └── ...
-    │   ├── metadata.json         # Session state
-    │   ├── session.log           # Event log
-    │   └── interview_20240127_123456.wav  # Final merged file
+    │   ├── metadata.json                  # Session state
+    │   ├── session.log                    # Event log
+    │   ├── .completed                     # Written when finalised
+    │   ├── interview_20240127_123456.wav  # Merged WAV
+    │   └── interview_20240127_123456.m4a  # Merged m4a
     └── def456-session-id/
         └── ...
 ```
@@ -155,28 +160,31 @@ My Documents/
 | **FFmpegService** | Compression | Queue compression jobs |
 | **MicrophoneCapture** | Mic recording | Capture from input device |
 | **LoopbackCapture** | System audio | Capture loopback |
-| **MixedCapture** | Both sources | Mix mic + system audio |
 
 ## Configuration Quick Reference
 
 ```json
 {
-  "AudioConfig": {
-    "CaptureMode": "InputDevice | Loopback | Mix",
-    "SampleRate": 44100,          // Hz
-    "Channels": 1,                // 1=mono, 2=stereo
-    "BitsPerSample": 16,          // 16 or 24
-    "ChunkDurationMinutes": 5,    // 1-60
-    "AutoSaveIntervalSeconds": 30, // 10-300
+  "AudioConfiguration": {
+    "CaptureMode": "InputDevice",   // InputDevice | Loopback (string)
+    "SampleRate": 44100,            // Hz
+    "Channels": 1,                  // 1=mono, 2=stereo
+    "BitsPerSample": 16,            // 16 or 24
+    "ChunkDurationMinutes": 1,      // 1-60
+    "InputDevice": { "Enabled": true, "DeviceId": 0 },
     "Compression": {
       "Enabled": true,
-      "Format": "mp3",            // mp3, aac, ogg
-      "Bitrate": "128k",          // 64k-320k
-      "FFmpegPath": "ffmpeg"
+      "Format": "m4a",
+      "Codec": "aac",               // aac | libopus
+      "Bitrate": 128,               // kbps (integer)
+      "FFmpegPath": "ffmpeg",
+      "DeleteWavAfterConversion": false
     }
   }
 }
 ```
+
+Root key is `AudioConfiguration`. `CaptureMode` is a string. `AutoSaveIntervalSeconds` still exists in the model but is unused.
 
 ## Common Operations
 
@@ -215,9 +223,15 @@ if (incomplete != null)
 ## Event Subscriptions
 
 ```csharp
-// In MainWindow constructor
+// In MainWindow (InitializeRecorder)
 _orchestrator.LogMessage += OnLogMessage;
 _orchestrator.StateChanged += OnStateChanged;
+_orchestrator.AudioLevel += OnAudioLevel;          // waveform peaks
+_orchestrator.ChunkStarted += OnChunkStarted;      // grid rows
+_orchestrator.ChunkClosed += OnChunkClosed;        // end/duration/size
+_orchestrator.ConversionStarted += OnConversionStarted;
+_orchestrator.ConversionCompleted += OnConversionCompleted;
+_orchestrator.RecordingMerged += OnRecordingMerged; // merged-file row
 
 // Handlers
 private void OnLogMessage(string message)
@@ -244,10 +258,10 @@ private void OnStateChanged()
 
 ## Memory Considerations
 
-- **Chunk Size**: 5 min @ 44.1kHz = ~50 MB WAV
-- **Compression**: 10:1 ratio typical (MP3 128k)
-- **Auto-save**: Minimal overhead (JSON serialization)
-- **Peak Memory**: ~100 MB during merge operation
+- **Chunk Size**: 1 min @ 44.1kHz mono 16-bit = ~5 MB WAV
+- **Compression**: ~10:1 typical (m4a/AAC 128k)
+- **State save**: per chunk close (JSON, minimal overhead)
+- **Streaming merge**: chunks are copied through, not all held in memory
 
 ## Performance Characteristics
 
@@ -350,8 +364,8 @@ dotnet publish -c Release -r win-x64 --self-contained
 
 ## Version Information
 
-- **.NET**: 8.0
-- **NAudio**: 2.2.1+
+- **.NET**: 9.0 (net9.0-windows)
+- **NAudio**: 2.2.1
 - **Target**: Windows 10+
 - **Architecture**: x64
 
