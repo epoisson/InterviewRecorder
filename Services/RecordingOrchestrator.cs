@@ -30,6 +30,7 @@ namespace InterviewRecorder.Services
         // Duration counts active recording time only, excluding paused periods.
         private TimeSpan _accumulatedDuration;  // recorded time from completed segments
         private DateTime _segmentStartTime;     // start of the current recording segment
+
         public event Action<string>? LogMessage;
         public event Action? StateChanged;
         public event Action<float>? AudioLevel;
@@ -145,6 +146,12 @@ namespace InterviewRecorder.Services
         }
 
         public string GetConfigFilePath() => _configManager.GetConfigFilePath();
+
+        /// <summary>Logs a user interface action as "UI EVENT: &lt;label&gt;".</summary>
+        public void LogUiEvent(string label)
+        {
+            _ = _logManager.LogAsync($"UI EVENT: {label}");
+        }
 
         public async Task<RecordingSession?> CheckForIncompleteSessionAsync()
         {
@@ -354,7 +361,7 @@ namespace InterviewRecorder.Services
                 await _stateManager.SaveStateAsync(_currentSession);
                 await _stateManager.MarkSessionCompleteAsync(_currentSession.SessionId);
 
-                await _logManager.LogAsync($"Recording completed: {finalFile}");
+                await _logManager.LogAsync($"Recording completed: {Path.GetFileName(finalFile)}");
                 StateChanged?.Invoke();
 
                 // Restart FFmpeg service for next recording

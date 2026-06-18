@@ -129,6 +129,7 @@ namespace InterviewRecorder
                 if (result == MessageBoxResult.Yes)
                 {
                     await _orchestrator.RecoverSessionAsync(incompleteSession.SessionId);
+                    _orchestrator.LogUiEvent("Recovery mode");
                     PopulateExistingChunks();
                     LogMessage("Session recovered successfully!");
                     UpdateUIState();
@@ -261,6 +262,7 @@ namespace InterviewRecorder
 
                     if (result != MessageBoxResult.Yes) return;
 
+                    _orchestrator.LogUiEvent("Stop Recording");
                     LogMessage("Stopping recording and merging chunks...");
                     var finalFile = await _orchestrator.StopRecordingAsync();
                     LogMessage($"Recording completed: {finalFile}");
@@ -275,6 +277,7 @@ namespace InterviewRecorder
                 }
                 else
                 {
+                    _orchestrator.LogUiEvent("Start Recording");
                     StopPlayback(); // don't keep playing the previous file while recording a new one
                     ClearWaveform();
                     _chunks.Clear();
@@ -300,11 +303,13 @@ namespace InterviewRecorder
             {
                 if (_orchestrator.CurrentState == Models.RecordingState.Recording)
                 {
+                    _orchestrator.LogUiEvent("Pause");
                     LogMessage("Pausing recording...");
                     await _orchestrator.PauseRecordingAsync();
                 }
                 else if (_orchestrator.CurrentState == Models.RecordingState.Paused)
                 {
+                    _orchestrator.LogUiEvent("Resume");
                     LogMessage("Resuming recording...");
                     await _orchestrator.ResumeRecordingAsync();
                 }
@@ -326,8 +331,9 @@ namespace InterviewRecorder
                 return;
             }
             
+            _orchestrator.LogUiEvent("Session Details");
             var details = _orchestrator.GetStatusDetails();
-            MessageBox.Show(details, "Session Details", 
+            MessageBox.Show(details, "Session Details",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -362,6 +368,7 @@ namespace InterviewRecorder
             if (_orchestrator == null || sender is not MenuItem mi || mi.Tag is not int id) return;
 
             // The Device menu is disabled unless idle, so this only fires when changing is allowed.
+            _orchestrator.LogUiEvent($"Select device: {mi.Header}");
             SyncDeviceChecks(id);
             await _orchestrator.SetInputDeviceAsync(id);
             LogMessage($"Input device selected: {mi.Header}");
@@ -377,6 +384,8 @@ namespace InterviewRecorder
 
         private void PlayButton_Click(object sender, RoutedEventArgs e)
         {
+            _orchestrator?.LogUiEvent(_player != null ? "Stop Playing" : "Play Recording");
+
             // Toggle: if something is playing, stop it.
             if (_player != null)
             {
@@ -601,6 +610,8 @@ namespace InterviewRecorder
 
         private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
         {
+            _orchestrator?.LogUiEvent("Open Folder");
+
             // Last recording's session folder, else the recordings root.
             string? folder = !string.IsNullOrEmpty(_lastRecordedFile) && File.Exists(_lastRecordedFile)
                 ? Path.GetDirectoryName(_lastRecordedFile)
@@ -630,10 +641,16 @@ namespace InterviewRecorder
                 return;
             }
 
+            _orchestrator?.LogUiEvent("Open Config File");
             System.Diagnostics.Process.Start("notepad.exe", path);
         }
 
-        private void PanelToggle_Click(object sender, RoutedEventArgs e) => UpdatePanels();
+        private void PanelToggle_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem mi)
+                _orchestrator?.LogUiEvent($"View: {mi.Header} {(mi.IsChecked ? "shown" : "hidden")}");
+            UpdatePanels();
+        }
 
         private void UpdatePanels()
         {
@@ -668,6 +685,7 @@ namespace InterviewRecorder
 
         private void ClearLog_Click(object sender, RoutedEventArgs e)
         {
+            _orchestrator?.LogUiEvent("Clear Log");
             LogTextBox.Clear();
         }
 

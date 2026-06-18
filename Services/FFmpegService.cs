@@ -276,8 +276,7 @@ namespace InterviewRecorder.Services
                 Path.GetDirectoryName(outputPath)!,
                 $"concat_{Path.GetFileNameWithoutExtension(outputPath)}.txt");
 
-            var lines = inputFiles.Select(f => $"file '{f.Replace("\\", "/")}'");
-            await File.WriteAllLinesAsync(listPath, lines);
+            await File.WriteAllLinesAsync(listPath, inputFiles.Select(f => $"file '{f.Replace("\\", "/")}'"));
 
             try
             {
@@ -293,7 +292,7 @@ namespace InterviewRecorder.Services
             }
             finally
             {
-                try { if (File.Exists(listPath)) File.Delete(listPath); } catch { /* temp list cleanup */ }
+                try { if (File.Exists(listPath)) File.Delete(listPath); } catch { /* temp cleanup */ }
             }
         }
 
