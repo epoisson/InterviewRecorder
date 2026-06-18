@@ -18,10 +18,11 @@ namespace InterviewRecorder.Services
     /// Runs a single background worker that converts queued WAV chunks to compressed audio
     /// (m4a) via the external FFmpeg process, and merges converted chunks into one file.
     /// </summary>
-    public class FFmpegService
+    public class FFmpegService : IDisposable
     {
         private readonly LogManager _logManager;
         private readonly ConcurrentQueue<ConversionJob> _conversionQueue;
+        private readonly object _lifecycleLock = new();
         private CancellationTokenSource _cancellationTokenSource;
         private Task? _conversionWorker;
         private bool _isRunning;
@@ -38,33 +39,41 @@ namespace InterviewRecorder.Services
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
-        public async void Start()
+        public Task Start()
         {
-            if (_isRunning) return;
+            lock (_lifecycleLock)
+            {
+                if (_isRunning) return Task.CompletedTask;
 
-            _isRunning = true;
-            _drainAndStop = false;
-            _cancellationTokenSource = new CancellationTokenSource();
-            _conversionWorker = Task.Run(() => ProcessConversionQueue(_cancellationTokenSource.Token));
-            await _logManager.LogAsync("FFmpeg conversion service started");
+                _isRunning = true;
+                _drainAndStop = false;
+                _cancellationTokenSource = new CancellationTokenSource();
+                _conversionWorker = Task.Run(() => ProcessConversionQueue(_cancellationTokenSource.Token));
+            }
+            return _logManager.LogAsync("FFmpeg conversion service started");
         }
 
         // Drains the queue: lets every pending conversion finish before stopping.
         // (Earlier this cancelled the token, which dropped any not-yet-converted chunk.)
         public async Task Stop()
         {
-            if (!_isRunning) return;
+            Task? worker;
+            lock (_lifecycleLock)
+            {
+                if (!_isRunning) return;
+                _isRunning = false;
+                _drainAndStop = true;
+                worker = _conversionWorker;
+            }
 
             await _logManager.LogAsync("Draining FFmpeg conversion queue...");
-            _isRunning = false;
-            _drainAndStop = true;
 
-            if (_conversionWorker != null)
+            if (worker != null)
             {
                 // Generous safety timeout: if a conversion truly hangs, hard-cancel as a fallback.
-                var completed = await Task.WhenAny(_conversionWorker, Task.Delay(TimeSpan.FromMinutes(2)));
+                var completed = await Task.WhenAny(worker, Task.Delay(TimeSpan.FromMinutes(2)));
 
-                if (completed != _conversionWorker)
+                if (completed != worker)
                 {
                     await _logManager.LogAsync("WARNING: FFmpeg drain timed out; cancelling remaining jobs");
                     try { _cancellationTokenSource.Cancel(); } catch (ObjectDisposedException) { }
@@ -72,7 +81,7 @@ namespace InterviewRecorder.Services
 
                 try
                 {
-                    await _conversionWorker;
+                    await worker;
                     await _logManager.LogAsync("FFmpeg conversion queue drained");
                 }
                 catch (OperationCanceledException)
@@ -330,5 +339,17 @@ namespace InterviewRecorder.Services
         }
 
         private record ConversionJob(string InputPath, string OutputPath, CompressionConfig Config);
+
+        public void Dispose()
+        {
+            lock (_lifecycleLock)
+            {
+                _isRunning = false;
+                _drainAndStop = true;
+            }
+            try { _cancellationTokenSource.Cancel(); } catch (ObjectDisposedException) { }
+            _cancellationTokenSource.Dispose();
+            GC.SuppressFinalize(this);
+        }
     }
 }

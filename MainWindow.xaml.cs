@@ -531,6 +531,7 @@ namespace InterviewRecorder
         {
             _chunks.Clear();
 
+            var compressedExt = "." + _orchestrator.CompressionFormat; // e.g. ".m4a" / ".opus"
             foreach (var wav in _orchestrator.CurrentChunkFiles)
             {
                 var info = new Models.ChunkInfo { Number = ParseChunkNumber(wav) ?? "?" };
@@ -552,7 +553,7 @@ namespace InterviewRecorder
                 }
                 catch { /* ignore unreadable file metadata */ }
 
-                if (File.Exists(Path.ChangeExtension(wav, ".m4a")))
+                if (File.Exists(Path.ChangeExtension(wav, compressedExt)))
                     info.ConversionStatus = "Done";
 
                 _chunks.Add(info);
@@ -691,10 +692,14 @@ namespace InterviewRecorder
 
         protected override async void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            if (_orchestrator?.IsRecording == true)
+            // Both Recording and Paused sessions still need finalizing (merge + flush).
+            var state = _orchestrator?.CurrentState ?? Models.RecordingState.Idle;
+            bool active = state == Models.RecordingState.Recording || state == Models.RecordingState.Paused;
+
+            if (active)
             {
                 var result = MessageBox.Show(
-                    "Recording is in progress. Do you want to stop recording before closing?",
+                    "A recording is in progress. Do you want to stop and save it before closing?",
                     "Recording Active",
                     MessageBoxButton.YesNoCancel,
                     MessageBoxImage.Warning);
@@ -702,13 +707,16 @@ namespace InterviewRecorder
                 if (result == MessageBoxResult.Yes)
                 {
                     e.Cancel = true;
-                    await _orchestrator.StopRecordingAsync();
-                    Close();
+                    await _orchestrator!.StopRecordingAsync();
+                    Close(); // session is Completed now, so this pass falls through
+                    return;
                 }
                 else if (result == MessageBoxResult.Cancel)
                 {
                     e.Cancel = true;
+                    return;
                 }
+                // "No": fall through and close; OnClosed disposes the orchestrator (releases the device).
             }
 
             base.OnClosing(e);

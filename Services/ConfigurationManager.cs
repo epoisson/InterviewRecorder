@@ -14,7 +14,7 @@ namespace InterviewRecorder.Services
     /// Loads, validates, saves, and watches appsettings.json, and exposes the current
     /// <see cref="AudioConfig"/>. Raises a change event when the file is edited.
     /// </summary>
-    public class ConfigurationManager
+    public class ConfigurationManager : IDisposable
     {
         // Shared so load and save agree: enums as strings ("InputDevice"), tolerant of casing.
         private static readonly JsonSerializerOptions JsonOptions = new()
@@ -69,14 +69,17 @@ namespace InterviewRecorder.Services
         {
             try
             {
-                var json = File.ReadAllText(_configFilePath);
-                _currentConfig = JsonSerializer.Deserialize<AppConfiguration>(json, JsonOptions);
-                
-                if (_currentConfig == null)
+                var json = await ReadFileWithRetryAsync(_configFilePath);
+                var loaded = JsonSerializer.Deserialize<AppConfiguration>(json, JsonOptions);
+
+                if (loaded == null)
                 {
-                    _currentConfig = new AppConfiguration();
+                    // Empty/invalid file: keep whatever config we already had rather than wiping it.
+                    await _logManager.LogAsync("Configuration file was empty; keeping previous settings");
+                    return;
                 }
 
+                _currentConfig = loaded;
                 await ValidateConfiguration();
                 var cfg = _currentConfig.AudioSettings;
                 await _logManager.LogAsync(
@@ -85,8 +88,26 @@ namespace InterviewRecorder.Services
             }
             catch (Exception ex)
             {
-                await _logManager.LogAsync($"Error loading configuration: {ex.Message}");
-                _currentConfig = new AppConfiguration();
+                // Don't clobber a good in-memory config on a transient read/parse failure
+                // (e.g. an editor briefly locking the file mid-save).
+                await _logManager.LogAsync($"Error loading configuration (keeping previous settings): {ex.Message}");
+            }
+        }
+
+        // The file may be momentarily locked by the editor that just saved it; retry briefly.
+        private static async Task<string> ReadFileWithRetryAsync(string path)
+        {
+            const int attempts = 5;
+            for (int i = 0; ; i++)
+            {
+                try
+                {
+                    return await File.ReadAllTextAsync(path);
+                }
+                catch (IOException) when (i < attempts - 1)
+                {
+                    await Task.Delay(100);
+                }
             }
         }
 
@@ -240,8 +261,11 @@ namespace InterviewRecorder.Services
             if (_fileWatcher != null)
             {
                 _fileWatcher.EnableRaisingEvents = false;
+                _fileWatcher.Changed -= OnConfigFileChanged;
                 _fileWatcher.Dispose();
+                _fileWatcher = null;
             }
+            GC.SuppressFinalize(this);
         }
     }
 }

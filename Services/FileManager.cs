@@ -76,6 +76,7 @@ namespace InterviewRecorder.Services
             // Writer is created lazily from the first readable chunk's format, so a corrupt or
             // incomplete chunk (e.g. the one being written when the app crashed) is skipped.
             WaveFileWriter? writer = null;
+            WaveFormat? format = null;
             try
             {
                 foreach (var chunkFile in session.ChunkFiles)
@@ -92,7 +93,16 @@ namespace InterviewRecorder.Services
 
                     using (reader)
                     {
-                        writer ??= new WaveFileWriter(finalPath, reader.WaveFormat);
+                        // Don't mix formats: a chunk recorded under different settings (e.g. config
+                        // changed before a crash recovery) would corrupt a raw byte-copy merge. Skip it.
+                        if (format != null && !reader.WaveFormat.Equals(format))
+                            continue;
+
+                        if (writer == null)
+                        {
+                            format = reader.WaveFormat;
+                            writer = new WaveFileWriter(finalPath, format);
+                        }
                         await reader.CopyToAsync(writer);
                     }
                 }

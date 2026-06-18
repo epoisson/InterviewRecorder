@@ -12,7 +12,7 @@ namespace InterviewRecorder.Services
     /// to <see cref="FFmpegService"/> for m4a conversion. Also raises per-block peak levels for
     /// the waveform display.
     /// </summary>
-    public class AudioCaptureEngine
+    public class AudioCaptureEngine : IDisposable
     {
         private readonly FileManager _fileManager;
         private readonly LogManager _logManager;
@@ -143,7 +143,7 @@ namespace InterviewRecorder.Services
             _currentChunkWriter = new WaveFileWriter(chunkPath, _chunkFormat);
             _chunkStartTime = DateTime.Now;
             _currentChunkNumber = _chunkIndex;
-            _session.ChunkFiles.Add(chunkPath);
+            lock (_session.ChunkFiles) _session.ChunkFiles.Add(chunkPath); // sync with StateManager serialize
             _chunkIndex++;
             _ = _logManager.LogAsync($"Created chunk {Path.GetFileName(chunkPath)}");
             ChunkStarted?.Invoke(_currentChunkNumber, _chunkStartTime);
@@ -173,7 +173,14 @@ namespace InterviewRecorder.Services
         {
             _audioCapture?.StopRecording();
             CloseAndQueueChunk();
-            _audioCapture?.Dispose();
+
+            if (_audioCapture != null)
+            {
+                _audioCapture.DataAvailable -= OnCaptureDataAvailable;
+                _audioCapture.RecordingStopped -= OnRecordingStopped;
+                _audioCapture.Dispose();
+                _audioCapture = null;
+            }
         }
 
         public void PauseRecording()
@@ -213,6 +220,26 @@ namespace InterviewRecorder.Services
             _config = config;
             _chunkDuration = TimeSpan.FromMinutes(config.ChunkDurationMinutes);
             _chunkIndex = session.ChunkFiles.Count; // resume numbering after recovered chunks
+        }
+
+        public void Dispose()
+        {
+            if (_audioCapture != null)
+            {
+                _audioCapture.DataAvailable -= OnCaptureDataAvailable;
+                _audioCapture.RecordingStopped -= OnRecordingStopped;
+                try { _audioCapture.StopRecording(); } catch { /* may already be stopped/disposed */ }
+                _audioCapture.Dispose();
+                _audioCapture = null;
+            }
+
+            lock (_chunkLock)
+            {
+                _currentChunkWriter?.Dispose();
+                _currentChunkWriter = null;
+            }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

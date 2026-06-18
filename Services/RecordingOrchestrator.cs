@@ -42,6 +42,7 @@ namespace InterviewRecorder.Services
 
         public string RecordingsFolder => _fileManager.BaseDirectory;
         public int CurrentInputDeviceId => _configManager.CurrentAudioConfig.InputDevice.DeviceId;
+        public string CompressionFormat => _configManager.CurrentAudioConfig.Compression.Format;
         public IReadOnlyList<string> CurrentChunkFiles =>
             _currentSession?.ChunkFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
         public Task SetInputDeviceAsync(int deviceId) => _configManager.SetInputDeviceAsync(deviceId);
@@ -93,8 +94,14 @@ namespace InterviewRecorder.Services
 
         public void Dispose()
         {
-            _durationTimer?.Stop();
-            _durationTimer?.Dispose();
+            _durationTimer.Stop();
+            _durationTimer.Dispose();
+
+            _configManager.ConfigurationChanged -= OnConfigurationChanged;
+            _configManager.Dispose();   // stops the FileSystemWatcher
+            _ffmpegService.Dispose();   // cancels the conversion worker
+            _audioCapture.Dispose();    // stops + disposes the capture device
+
             GC.SuppressFinalize(this);
         }
         
@@ -121,7 +128,7 @@ namespace InterviewRecorder.Services
                 else
                 {
                     await _logManager.LogAsync("FFmpeg detected and ready");
-                    _ffmpegService.Start();
+                    await _ffmpegService.Start();
                 }
             }
         }
@@ -367,7 +374,7 @@ namespace InterviewRecorder.Services
                 // Restart FFmpeg service for next recording
                 if (config.Compression.Enabled)
                 {
-                    _ffmpegService.Start();
+                    await _ffmpegService.Start();
                 }
 
                 return finalFile;
