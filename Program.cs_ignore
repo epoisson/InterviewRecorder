@@ -1,0 +1,114 @@
+﻿// ============================================================================
+// Program.cs - Console Entry Point
+// ============================================================================
+using System;
+using System.Threading.Tasks;
+using InterviewRecorder.Services;
+
+namespace InterviewRecorder
+{
+    class Program
+    {
+        static async Task Main(string[] args)
+        {
+            Console.WriteLine("==============================================");
+            Console.WriteLine("   Interview Audio Recording System - POC");
+            Console.WriteLine("==============================================");
+            Console.WriteLine();
+
+            var orchestrator = new RecordingOrchestrator();
+            
+            // Check for incomplete sessions on startup
+            var incompleteSession = await orchestrator.CheckForIncompleteSessionAsync();
+            if (incompleteSession != null)
+            {
+                Console.WriteLine($"Found incomplete session: {incompleteSession.SessionId}");
+                Console.WriteLine($"Started: {incompleteSession.StartTime}");
+                Console.WriteLine($"Duration: {incompleteSession.Duration}");
+                Console.Write("Do you want to continue this session? (Y/N): ");
+                
+                var response = Console.ReadKey();
+                Console.WriteLine();
+                
+                if (response.Key == ConsoleKey.Y)
+                {
+                    await orchestrator.RecoverSessionAsync(incompleteSession.SessionId);
+                    Console.WriteLine("Session recovered successfully!");
+                }
+                else
+                {
+                    Console.WriteLine("Starting new session...");
+                }
+            }
+
+            bool running = true;
+            while (running)
+            {
+                Console.WriteLine();
+                DisplayMenu(orchestrator);
+                
+                var key = Console.ReadKey(true);
+                Console.WriteLine();
+
+                try
+                {
+                    switch (key.Key)
+                    {
+                        case ConsoleKey.D1:
+                            await orchestrator.StartRecordingAsync();
+                            break;
+                        case ConsoleKey.D2:
+                            orchestrator.PauseRecording();
+                            break;
+                        case ConsoleKey.D3:
+                            orchestrator.ResumeRecording();
+                            break;
+                        case ConsoleKey.D4:
+                            await orchestrator.StopRecordingAsync();
+                            break;
+                        case ConsoleKey.D5:
+                            orchestrator.DisplayStatus();
+                            break;
+                        case ConsoleKey.D6:
+                            orchestrator.ListAvailableDevices();
+                            break;
+                        case ConsoleKey.Escape:
+                        case ConsoleKey.Q:
+                            if (orchestrator.IsRecording)
+                            {
+                                Console.WriteLine("Recording in progress. Stopping before exit...");
+                                await orchestrator.StopRecordingAsync();
+                            }
+                            running = false;
+                            break;
+                        default:
+                            Console.WriteLine("Invalid option. Please try again.");
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+            }
+
+            Console.WriteLine("Application closed. Goodbye!");
+        }
+
+        static void DisplayMenu(RecordingOrchestrator orchestrator)
+        {
+            Console.WriteLine("─────────────────────────────────────────────");
+            Console.WriteLine($"Status: {orchestrator.CurrentState} | Duration: {orchestrator.CurrentDuration:hh\\:mm\\:ss}");
+            Console.WriteLine("─────────────────────────────────────────────");
+            Console.WriteLine("1. Start Recording");
+            Console.WriteLine("2. Pause Recording");
+            Console.WriteLine("3. Resume Recording");
+            Console.WriteLine("4. Stop Recording");
+            Console.WriteLine("5. Display Status");
+            Console.WriteLine("6. List Audio Devices");
+            Console.WriteLine("Q/ESC. Exit");
+            Console.WriteLine("─────────────────────────────────────────────");
+            Console.Write("Select option: ");
+        }
+    }
+}

@@ -1,0 +1,264 @@
+<Window x:Class="InterviewRecorder.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Interview Audio Recorder"
+        Height="700" Width="900"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackgroundBrush}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>   <!-- menu -->
+            <RowDefinition Height="Auto"/>   <!-- status -->
+            <RowDefinition Height="Auto"/>   <!-- controls -->
+            <RowDefinition Height="*"/>      <!-- content: waveform | log | chunks -->
+        </Grid.RowDefinitions>
+
+        <!-- Top menu bar -->
+        <Menu Grid.Row="0" Background="Transparent" Foreground="{StaticResource TextPrimaryBrush}">
+            <MenuItem Header="_View">
+                <MenuItem x:Name="ViewStatus" Header="Status" IsCheckable="True" IsChecked="True" Click="PanelToggle_Click"/>
+                <MenuItem x:Name="ViewControls" Header="Controls" IsCheckable="True" IsChecked="True" Click="PanelToggle_Click"/>
+                <MenuItem x:Name="ViewWaveform" Header="Waveform" IsCheckable="True" IsChecked="True" Click="PanelToggle_Click"/>
+                <MenuItem x:Name="ViewLog" Header="Log" IsCheckable="True" IsChecked="True" Click="PanelToggle_Click"/>
+                <MenuItem x:Name="ViewChunks" Header="Chunks" IsCheckable="True" IsChecked="True" Click="PanelToggle_Click"/>
+            </MenuItem>
+            <MenuItem x:Name="DeviceMenu" Header="_Device"/>
+            <MenuItem Header="_Config">
+                <MenuItem Header="Session Details" Click="StatusButton_Click"/>
+                <MenuItem Header="Open Config File" Click="OpenConfig_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Status Panel -->
+        <Border x:Name="StatusPanel" Grid.Row="1" Style="{StaticResource StatusCard}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="STATUS"
+                              FontSize="11"
+                              FontWeight="Bold"
+                              Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock x:Name="StatusText"
+                              Text="Idle"
+                              FontSize="24"
+                              FontWeight="Bold"
+                              Foreground="{StaticResource PrimaryBrush}"
+                              Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="DURATION"
+                              FontSize="11"
+                              FontWeight="Bold"
+                              Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock x:Name="DurationText"
+                              Text="00:00:00"
+                              FontSize="24"
+                              FontWeight="Bold"
+                              Foreground="{StaticResource TextPrimaryBrush}"
+                              Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="SESSION ID"
+                              FontSize="11"
+                              FontWeight="Bold"
+                              Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock x:Name="SessionIdText"
+                              Text="No active session"
+                              FontSize="14"
+                              FontWeight="Medium"
+                              Foreground="{StaticResource TextSecondaryBrush}"
+                              Margin="0,8,0,0"
+                              TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                    <Button x:Name="OpenFolderButton"
+                            Content="📁 Open Folder"
+                            Style="{StaticResource ModernButton}"
+                            Click="OpenFolderButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Control Buttons -->
+        <Border x:Name="ControlsPanel" Grid.Row="2" Style="{StaticResource StatusCard}">
+            <StackPanel>
+                <TextBlock Text="CONTROLS"
+                          FontSize="11"
+                          FontWeight="Bold"
+                          Foreground="{StaticResource TextSecondaryBrush}"
+                          Margin="0,0,0,10"/>
+
+                <UniformGrid Columns="3" Rows="1">
+                    <Button x:Name="RecordButton"
+                            Content="⏺ Start Recording"
+                            Style="{StaticResource SuccessButton}"
+                            Click="RecordButton_Click"
+                            IsEnabled="False"/>
+
+                    <Button x:Name="PauseResumeButton"
+                            Content="⏸ Pause"
+                            Style="{StaticResource WarningButton}"
+                            Click="PauseResumeButton_Click"
+                            IsEnabled="False"/>
+
+                    <Button x:Name="PlayButton"
+                            Content="▶ Play Recording"
+                            Style="{StaticResource ModernButton}"
+                            Click="PlayButton_Click"
+                            IsEnabled="False"/>
+                </UniformGrid>
+            </StackPanel>
+        </Border>
+
+        <!-- Content: Waveform | Log | Chunks (all one row, resizable) -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="ColWave" Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition x:Name="ColLog" Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition x:Name="ColChunks" Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Waveform -->
+            <Border x:Name="WaveformPanel" Grid.Column="0" Style="{StaticResource StatusCard}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                              Text="WAVEFORM"
+                              FontSize="11"
+                              FontWeight="Bold"
+                              Foreground="{StaticResource TextSecondaryBrush}"
+                              Margin="0,0,0,10"/>
+                    <Canvas x:Name="WaveformCanvas"
+                            MinHeight="60"
+                            Background="#11161C"
+                            ClipToBounds="True"
+                            SizeChanged="WaveformCanvas_SizeChanged">
+                        <Polygon x:Name="WaveformShape"
+                                 Fill="{StaticResource PrimaryBrush}"/>
+                    </Canvas>
+                </DockPanel>
+            </Border>
+
+            <GridSplitter x:Name="WaveLogSplitter" Grid.Column="1"
+                          Width="6" Margin="2,0"
+                          HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                          Background="#656667"
+                          ResizeBehavior="PreviousAndNext"/>
+
+            <!-- Event Log -->
+            <Border x:Name="LogPanel" Grid.Column="4" Style="{StaticResource StatusCard}">
+                <DockPanel>
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                        <TextBlock Text="EVENT LOG"
+                                  FontSize="11"
+                                  FontWeight="Bold"
+                                  Foreground="{StaticResource TextSecondaryBrush}"
+                                  DockPanel.Dock="Left"/>
+                        <Button Content="Clear"
+                                Click="ClearLog_Click"
+                                Style="{StaticResource ModernButton}"
+                                Padding="10,5"
+                                FontSize="11"
+                                DockPanel.Dock="Right"
+                                HorizontalAlignment="Right"/>
+                    </DockPanel>
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBox x:Name="LogTextBox"
+                                Style="{StaticResource LogTextBox}"
+                                MinHeight="200"/>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <GridSplitter x:Name="LogChunksSplitter" Grid.Column="3"
+                          Width="6" Margin="2,0"
+                          HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                          Background="#656667"
+                          ResizeBehavior="PreviousAndNext"/>
+
+            <!-- Chunks -->
+            <Border x:Name="ChunksPanel" Grid.Column="2" Style="{StaticResource StatusCard}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                              Text="CHUNKS"
+                              FontSize="11"
+                              FontWeight="Bold"
+                              Foreground="{StaticResource TextSecondaryBrush}"
+                              Margin="0,0,0,10"/>
+                    <DataGrid x:Name="ChunksGrid"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              CanUserAddRows="False"
+                              SelectionMode="Single"
+                              Background="#11161C"
+                              RowBackground="#11161C"
+                              AlternatingRowBackground="#161D26"
+                              BorderThickness="0"
+                              MinHeight="200">
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                <Setter Property="Padding" Value="6,3"/>
+                            </Style>
+                        </DataGrid.CellStyle>
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="#656667"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Padding" Value="6,4"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="#" Binding="{Binding Number}" Width="Auto"/>
+                            <DataGridTextColumn Header="Start" Binding="{Binding StartText}" Width="Auto"/>
+                            <DataGridTextColumn Header="End" Binding="{Binding EndText}" Width="Auto"/>
+                            <DataGridTextColumn Header="Duration" Binding="{Binding DurationText}" Width="Auto"/>
+                            <DataGridTextColumn Header="Size" Binding="{Binding SizeText}" Width="Auto"/>
+                            <DataGridTemplateColumn Header="Conversion" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#9AA5B1"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ConversionStatus}" Value="Processing">
+                                                            <Setter Property="Foreground" Value="#FFB74D"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding ConversionStatus}" Value="Done">
+                                                            <Setter Property="Foreground" Value="#4CAF50"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding ConversionStatus}" Value="Failed">
+                                                            <Setter Property="Foreground" Value="#F44336"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

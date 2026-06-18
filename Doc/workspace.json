@@ -1,0 +1,1812 @@
+{
+  "configuration" : { },
+  "description" : "C4 Model for Interview Audio Recorder Application",
+  "documentation" : {
+    "sections" : [ {
+      "content" : "# Interview Recorder - Complete C4 Architecture Documentation\n\n## 📦 Package Contents\n\nThis package contains comprehensive C4 architecture documentation for the Interview Recorder application.\n\n### Core Documentation\n\n1. **workspace.dsl** - Main Structurizr DSL file containing:\n   - System Context diagram (Level 1)\n   - Container diagram (Level 2)\n   - Component diagrams (Level 3)\n   - Dynamic diagrams (workflows)\n   - Deployment diagram\n   - Complete relationship mappings\n\n2. **c4-docs/** - Supporting documentation\n   - Complete architecture documentation\n   - Architecture Decision Records (ADRs)\n   - Deployment guides\n   - Quick reference materials\n\n## 📊 Diagrams Included\n\n### Static Structure Diagrams\n\n#### System Context (Level 1)\n- Shows Interview Recorder in relation to external systems\n- Users, Windows OS, FFmpeg\n- High-level system boundaries\n\n#### Container (Level 2)\n- WPF Application\n- File System storage\n- Configuration storage\n- Technology choices\n\n#### Component (Level 3)\nMultiple component views showing:\n- **Components-Overview**: All components and relationships\n- **Components-CoreServices**: Service layer in detail\n- **Components-AudioCapture**: Audio subsystem\n- **Components-StateManagement**: State persistence and recovery\n\n### Dynamic Diagrams\n\n#### StartRecording\nStep-by-step sequence when user starts recording:\n1. User clicks Start\n2. Create session\n3. Initialize audio capture\n4. Start duration timer\n5. Update UI\n\n#### AudioDataFlow\nContinuous data processing during recording:\n1. Audio device → Capture\n2. Write to chunk file\n3. Auto-save state\n4. Queue compression\n\n#### StopRecording\nFinalization sequence:\n1. Stop audio capture\n2. Wait for compression\n3. Merge chunks\n4. Mark complete\n5. Show result\n\n#### CrashRecovery\nRecovery process on startup:\n1. Scan for incomplete sessions\n2. Prompt user\n3. Load session state\n4. Resume or finalize\n\n### Deployment Diagram\nProduction deployment showing:\n- User's computer\n- Audio hardware\n- Storage locations\n- Software components\n\n## 📁 File Structure\n\n```\n/\n├── workspace.dsl                 # Main Structurizr DSL file\n├── BUG_FIX_REPORT.md            # Bug fixes for the project\n├── MainWindow.xaml.cs            # Fixed UI code\n├── RecordingOrchestrator.cs      # Fixed orchestrator code\n└── c4-docs/\n    ├── README.md                 # Documentation overview\n    ├── QUICK_REFERENCE.md        # Developer quick reference\n    ├── docs/\n    │   ├── 01-system-overview.md      # System overview\n    │   ├── 02-component-catalog.md    # Component details\n    │   └── 03-deployment-guide.md     # Deployment guide\n    └── adrs/\n        └── architecture-decisions.md   # ADRs for key decisions\n```\n\n## 🚀 Getting Started\n\n### Viewing the Diagrams\n\n#### Option 1: Structurizr Lite (Docker) - Recommended\n```bash\n# Pull image\ndocker pull structurizr/lite\n\n# Run (from this directory)\ndocker run -it --rm -p 8080:8080 -v $(pwd):/usr/local/structurizr structurizr/lite\n\n# Open browser\nhttp://localhost:8080\n```\n\n#### Option 2: Online Structurizr\n1. Go to https://structurizr.com\n2. Create free account\n3. Upload `workspace.dsl`\n4. View interactive diagrams\n\n#### Option 3: VS Code\n1. Install \"Structurizr DSL\" extension\n2. Open `workspace.dsl`\n3. Preview in editor\n\n### Reading the Documentation\n\nStart with these files in order:\n\n1. **c4-docs/README.md** - Overview of documentation structure\n2. **c4-docs/docs/01-system-overview.md** - Understand the system\n3. **c4-docs/docs/02-component-catalog.md** - Component details\n4. **c4-docs/QUICK_REFERENCE.md** - Quick developer reference\n5. **c4-docs/adrs/architecture-decisions.md** - Why decisions were made\n\n## 🎯 What's Documented\n\n### Architecture\n- ✅ System context and boundaries\n- ✅ Container-level architecture\n- ✅ Component-level design\n- ✅ All major workflows\n- ✅ Deployment architecture\n\n### Components\n- ✅ All 20+ components documented\n- ✅ Responsibilities clearly defined\n- ✅ Relationships mapped\n- ✅ Dependencies identified\n\n### Design Decisions\n- ✅ Chunked recording strategy\n- ✅ Event-driven architecture\n- ✅ Orchestrator pattern\n- ✅ Strategy pattern for audio capture\n- ✅ JSON for persistence\n- ✅ FFmpeg integration\n- ✅ Crash recovery approach\n\n### Workflows\n- ✅ Start recording flow\n- ✅ Audio data processing\n- ✅ Stop and finalization\n- ✅ Crash recovery\n- ✅ State transitions\n\n### Operational\n- ✅ Deployment guide\n- ✅ Configuration options\n- ✅ Troubleshooting\n- ✅ Performance tuning\n\n## 🏗️ Architecture Highlights\n\n### Layers\n```\n┌─────────────────────────────┐\n│      UI Layer               │  MainWindow\n├─────────────────────────────┤\n│   Orchestration Layer       │  RecordingOrchestrator\n├─────────────────────────────┤\n│     Service Layer           │  7 Core Services\n├─────────────────────────────┤\n│  Implementation Layer       │  3 Audio Capture Strategies\n├─────────────────────────────┤\n│     Model Layer             │  Data Models\n└─────────────────────────────┘\n```\n\n### Key Patterns\n- **Strategy Pattern**: Pluggable audio capture implementations\n- **Orchestrator Pattern**: Centralized workflow coordination\n- **Factory Pattern**: Audio capture creation\n- **Observer Pattern**: Event-driven UI updates\n- **Repository Pattern**: State persistence\n\n### Quality Attributes\n- **Reliability**: Auto-save every 30 seconds, chunked recording\n- **Recoverability**: Automatic crash detection and recovery\n- **Performance**: Async operations, background compression\n- **Maintainability**: Clean architecture, SOLID principles\n- **Usability**: Real-time feedback, clear error messages\n\n## 📋 Component Summary\n\n| Component | Type | Purpose |\n|-----------|------|---------|\n| MainWindow | UI | User interface and controls |\n| RecordingOrchestrator | Orchestrator | Coordinates all operations |\n| AudioCaptureEngine | Service | Manages audio lifecycle |\n| StateManager | Service | Persists session state |\n| FileManager | Service | File operations |\n| RecoveryManager | Service | Crash recovery |\n| LogManager | Service | Event logging |\n| ConfigurationManager | Service | Configuration management |\n| FFmpegService | Service | Audio compression |\n| MicrophoneCapture | Strategy | Microphone recording |\n| LoopbackCapture | Strategy | System audio recording |\n| MixedCapture | Strategy | Combined recording |\n| RecordingSession | Model | Session data |\n| AudioConfig | Model | Configuration data |\n\n## 🔄 Data Flow Summary\n\n```\nUser Input\n    ↓\nMainWindow (UI Thread)\n    ↓\nRecordingOrchestrator (Async)\n    ↓\nAudioCaptureEngine\n    ↓\nIAudioCapture Implementation (Background Thread)\n    ↓\nFile System (Chunks)\n    ↓\nFFmpegService (Background Queue)\n    ↓\nCompressed Files\n```\n\n## 📖 How to Use This Documentation\n\n### For Stakeholders\n1. Read: `c4-docs/docs/01-system-overview.md`\n2. View: System Context diagram in Structurizr\n3. Review: Key features and quality attributes\n\n### For Architects\n1. Read: All documentation in order\n2. View: All diagrams in Structurizr\n3. Study: `c4-docs/adrs/architecture-decisions.md`\n4. Review: Component interactions\n\n### For Developers\n1. Start: `c4-docs/QUICK_REFERENCE.md`\n2. Deep dive: `c4-docs/docs/02-component-catalog.md`\n3. View: Component diagrams\n4. Reference: Quick reference during development\n\n### For DevOps\n1. Read: `c4-docs/docs/03-deployment-guide.md`\n2. View: Deployment diagram\n3. Review: Requirements and troubleshooting\n\n## 🛠️ Maintenance\n\n### Updating Diagrams\n1. Edit `workspace.dsl`\n2. Test in Structurizr Lite\n3. Update supporting documentation\n4. Commit changes\n\n### Adding Components\n1. Add to `workspace.dsl`\n2. Define relationships\n3. Add to relevant views\n4. Update component catalog\n5. Update diagrams\n\n### Version Control\n- Commit `workspace.dsl` with meaningful messages\n- Tag major architecture changes\n- Keep documentation in sync with code\n\n## 📚 Additional Resources\n\n### Structurizr\n- Documentation: https://docs.structurizr.com/\n- DSL Guide: https://github.com/structurizr/dsl\n- Examples: https://structurizr.com/share\n\n### C4 Model\n- Official Site: https://c4model.com/\n- Introduction: https://c4model.com/\n- Best Practices: https://c4model.com/review/\n\n### NAudio\n- Website: https://github.com/naudio/NAudio\n- Documentation: https://github.com/naudio/NAudio/wiki\n\n### FFmpeg\n- Website: https://ffmpeg.org/\n- Documentation: https://ffmpeg.org/documentation.html\n\n## ✅ Quality Checklist\n\nThis documentation package includes:\n- [x] Complete Structurizr DSL workspace\n- [x] All 4 levels of C4 diagrams\n- [x] Dynamic workflow diagrams\n- [x] Deployment architecture\n- [x] System overview documentation\n- [x] Component catalog\n- [x] Deployment guide\n- [x] Architecture Decision Records\n- [x] Quick reference guide\n- [x] README and index files\n- [x] Styling and themes configured\n- [x] All relationships documented\n\n## 📞 Support\n\nFor questions about this documentation:\n- Review `c4-docs/README.md` for overview\n- Check `c4-docs/QUICK_REFERENCE.md` for quick answers\n- View diagrams in Structurizr for visual understanding\n- Read ADRs for decision context\n\n## 📄 License\n\n[Specify your license here]\n\n---\n\n**Documentation Version**: 1.0  \n**Last Updated**: 2024-01-27  \n**Application Version**: 1.0  \n**Maintained By**: Architecture Team\n\n## 🎉 You're All Set!\n\nThis package contains everything you need to understand, maintain, and extend the Interview Recorder architecture. Start with the README in the c4-docs folder and work your way through the documentation.\n\nHappy architecting! 🏗️\n",
+      "filename" : "INDEX.md",
+      "format" : "Markdown",
+      "order" : 1,
+      "title" : ""
+    }, {
+      "content" : "# Interview Recorder - Quick Reference\n\n## System Architecture at a Glance\n\n```\n┌─────────────┐\n│   User      │\n└──────┬──────┘\n       │\n┌──────▼──────────────────────────────────────────────────────┐\n│                    MainWindow (WPF)                         │\n└──────┬──────────────────────────────────────────────────────┘\n       │\n┌──────▼────────────────────────────────────────────────────┐\n│              RecordingOrchestrator                        │\n│  (Coordinates all services, manages lifecycle)            │\n└───┬────┬────┬────┬────┬────┬────┬─────────────────────────┘\n    │    │    │    │    │    │    │\n    ▼    ▼    ▼    ▼    ▼    ▼    ▼\n  ┌─┴─┐┌─┴─┐┌─┴─┐┌─┴─┐┌─┴─┐┌─┴─┐┌─┴────┐\n  │ACE││SM ││FM ││RM ││LM ││CM ││FFmpeg│\n  └───┘└───┘└───┘└───┘└───┘└───┘└──────┘\n    │\n    ▼\n┌──────────────────────────────────┐\n│   IAudioCapture (Strategy)       │\n├──────────────────────────────────┤\n│ • MicrophoneCapture              │\n│ • LoopbackCapture                │\n│ • MixedCapture                   │\n└──────────────────────────────────┘\n```\n\n**Legend**:\n- ACE = AudioCaptureEngine\n- SM = StateManager\n- FM = FileManager\n- RM = RecoveryManager\n- LM = LogManager\n- CM = ConfigurationManager\n\n## Key Workflows\n\n### Recording Start Flow\n```\nUser → MainWindow.StartButton_Click()\n  → RecordingOrchestrator.StartRecordingAsync()\n    → Create RecordingSession\n    → StateManager.SaveStateAsync()\n    → AudioCaptureEngine.StartRecording()\n      → Create IAudioCapture (factory)\n      → Start audio capture\n      → Create first chunk file\n    → Start duration timer\n    → Raise StateChanged event\n  → MainWindow updates UI\n```\n\n### Audio Data Flow\n```\nAudio Device → IAudioCapture.DataAvailable\n  → AudioCaptureEngine.OnDataAvailable()\n    → Write to chunk file\n    → Check chunk duration (every 5 min)\n      → Close current chunk\n      → Queue for FFmpeg compression\n      → Create new chunk\n    → Check auto-save interval (every 30 sec)\n      → StateManager.SaveStateAsync()\n```\n\n### Recording Stop Flow\n```\nUser → MainWindow.StopButton_Click()\n  → RecordingOrchestrator.StopRecordingAsync()\n    → AudioCaptureEngine.StopRecording()\n    → Stop duration timer\n    → FFmpegService.Stop() (wait for queue)\n    → FileManager.MergeChunksAsync()\n      → Read all chunk files\n      → Write merged WAV file\n    → StateManager.MarkSessionCompleteAsync()\n    → Return final file path\n  → MainWindow shows completion dialog\n```\n\n### Crash Recovery Flow\n```\nApplication Startup\n  → MainWindow.CheckForRecovery()\n    → RecordingOrchestrator.CheckForIncompleteSessionAsync()\n      → RecoveryManager.FindIncompleteSessionAsync()\n        → Scan session directories\n        → Load metadata.json files\n        → Find sessions where State != Completed\n      → Return most recent incomplete session\n    → Show recovery dialog to user\n    → If user confirms:\n      → RecordingOrchestrator.RecoverSessionAsync()\n        → Load session state\n        → Initialize AudioCaptureEngine\n        → Update UI\n```\n\n## State Machine\n\n```\n     ┌──────┐\n     │ Idle │◄────────────────┐\n     └───┬──┘                 │\n         │ Start              │\n         ▼                    │\n   ┌───────────┐         ┌────────────┐\n   │ Recording │────────►│ Completed  │\n   └─┬─────────┘   Stop  └────────────┘\n     │     ▲                \nPause│     |Resume          \n     ▼     │                \n   ┌────────┐                  \n   │ Paused |                \n   └────────┘                          \n```\n\n## File Structure\n\n```\nMy Documents/\n└── InterviewRecordings/\n    ├── abc123-session-id/\n    │   ├── chunks/\n    │   │   ├── chunk_0000.wav\n    │   │   ├── chunk_0000.mp3\n    │   │   ├── chunk_0001.wav\n    │   │   ├── chunk_0001.mp3\n    │   │   └── ...\n    │   ├── metadata.json         # Session state\n    │   ├── session.log           # Event log\n    │   └── interview_20240127_123456.wav  # Final merged file\n    └── def456-session-id/\n        └── ...\n```\n\n## Component Responsibilities\n\n| Component | Primary Responsibility | Key Methods |\n|-----------|----------------------|-------------|\n| **MainWindow** | UI and user interaction | Button handlers, UI updates |\n| **RecordingOrchestrator** | Coordinate services | Start/Pause/Resume/Stop Recording |\n| **AudioCaptureEngine** | Audio lifecycle | Create chunks, manage capture |\n| **StateManager** | Persist state | SaveState, LoadState |\n| **FileManager** | File operations | Create directories, merge chunks |\n| **RecoveryManager** | Crash recovery | Find incomplete sessions |\n| **LogManager** | Logging | Write to session log |\n| **ConfigurationManager** | Configuration | Load settings |\n| **FFmpegService** | Compression | Queue compression jobs |\n| **MicrophoneCapture** | Mic recording | Capture from input device |\n| **LoopbackCapture** | System audio | Capture loopback |\n| **MixedCapture** | Both sources | Mix mic + system audio |\n\n## Configuration Quick Reference\n\n```json\n{\n  \"AudioConfig\": {\n    \"CaptureMode\": \"InputDevice | Loopback | Mix\",\n    \"SampleRate\": 44100,          // Hz\n    \"Channels\": 1,                // 1=mono, 2=stereo\n    \"BitsPerSample\": 16,          // 16 or 24\n    \"ChunkDurationMinutes\": 5,    // 1-60\n    \"AutoSaveIntervalSeconds\": 30, // 10-300\n    \"Compression\": {\n      \"Enabled\": true,\n      \"Format\": \"mp3\",            // mp3, aac, ogg\n      \"Bitrate\": \"128k\",          // 64k-320k\n      \"FFmpegPath\": \"ffmpeg\"\n    }\n  }\n}\n```\n\n## Common Operations\n\n### Get Current Status\n```csharp\nvar state = _orchestrator.CurrentState;\nvar duration = _orchestrator.CurrentDuration;\nvar sessionId = _orchestrator.CurrentSessionId;\n```\n\n### Start Recording\n```csharp\nawait _orchestrator.StartRecordingAsync();\n```\n\n### Pause/Resume\n```csharp\nawait _orchestrator.PauseRecordingAsync();\nawait _orchestrator.ResumeRecordingAsync();\n```\n\n### Stop and Finalize\n```csharp\nvar finalFile = await _orchestrator.StopRecordingAsync();\n```\n\n### Check for Recovery\n```csharp\nvar incomplete = await _orchestrator.CheckForIncompleteSessionAsync();\nif (incomplete != null)\n{\n    await _orchestrator.RecoverSessionAsync(incomplete.SessionId);\n}\n```\n\n## Event Subscriptions\n\n```csharp\n// In MainWindow constructor\n_orchestrator.LogMessage += OnLogMessage;\n_orchestrator.StateChanged += OnStateChanged;\n\n// Handlers\nprivate void OnLogMessage(string message)\n{\n    Dispatcher.Invoke(() => LogTextBox.AppendText($\"[{DateTime.Now}] {message}\\n\"));\n}\n\nprivate void OnStateChanged()\n{\n    Dispatcher.Invoke(() => UpdateUIState());\n}\n```\n\n## Threading Model\n\n| Component | Thread | Notes |\n|-----------|--------|-------|\n| MainWindow | UI Thread | Must use Dispatcher for cross-thread access |\n| RecordingOrchestrator | UI Thread | Async methods, timer on background thread |\n| AudioCaptureEngine | Background | Audio callbacks on NAudio thread |\n| StateManager | Background | All operations async |\n| FileManager | Background | Async I/O |\n| FFmpegService | Background | Queue processor on background task |\n\n## Memory Considerations\n\n- **Chunk Size**: 5 min @ 44.1kHz = ~50 MB WAV\n- **Compression**: 10:1 ratio typical (MP3 128k)\n- **Auto-save**: Minimal overhead (JSON serialization)\n- **Peak Memory**: ~100 MB during merge operation\n\n## Performance Characteristics\n\n| Operation | Time Complexity | Notes |\n|-----------|----------------|-------|\n| Start Recording | O(1) | Instant |\n| Audio Capture | O(1) | Constant per buffer |\n| Chunk Creation | O(1) | New file every N minutes |\n| Compression | O(n) | Background, non-blocking |\n| State Save | O(1) | JSON serialization |\n| Stop Recording | O(n) | Merge all chunks |\n| Recovery Scan | O(m) | m = number of sessions |\n\n## Debugging Tips\n\n### Enable Verbose Logging\n```csharp\n// In LogManager\nLogLevel = LogLevel.Verbose;\n```\n\n### Check Session State\n```\n[SessionId]/metadata.json\n```\n\n### View Chunks\n```\n[SessionId]/chunks/\n```\n\n### Check FFmpeg Output\n```\nsession.log (contains FFmpeg stderr)\n```\n\n### Verify Audio Format\n```csharp\nusing var reader = new WaveFileReader(chunkPath);\nConsole.WriteLine($\"Format: {reader.WaveFormat}\");\n```\n\n## Testing Checklist\n\n- [ ] Start recording - verify status and duration\n- [ ] Pause recording - verify duration stops\n- [ ] Resume recording - verify duration continues\n- [ ] Stop recording - verify final file created\n- [ ] Check file size - verify compression works\n- [ ] Simulate crash - verify recovery prompt\n- [ ] Test different capture modes\n- [ ] Test with different configurations\n- [ ] Test long recording (30+ minutes)\n- [ ] Test disk space handling\n\n## Troubleshooting Quick Guide\n\n| Problem | Check | Solution |\n|---------|-------|----------|\n| Buttons not responding | _orchestrator initialized? | Use async initialization pattern |\n| Duration not updating | Timer started? | Uncomment InitializeTimer() |\n| No audio captured | Device available? | Check audio devices |\n| Compression not working | FFmpeg installed? | Install FFmpeg or disable compression |\n| Recovery not working | metadata.json exists? | Check file permissions |\n| High CPU usage | Compression enabled? | Reduce bitrate or disable |\n\n## Key Files to Know\n\n| File | Purpose | Location |\n|------|---------|----------|\n| MainWindow.xaml.cs | UI logic | Root |\n| RecordingOrchestrator.cs | Orchestration | Services/ |\n| AudioCaptureEngine.cs | Audio management | Services/ |\n| appsettings.json | Configuration | App directory |\n| metadata.json | Session state | Per session |\n| session.log | Event log | Per session |\n\n## Quick Commands\n\n### Build\n```bash\ndotnet build\n```\n\n### Run\n```bash\ndotnet run\n```\n\n### Publish\n```bash\ndotnet publish -c Release -r win-x64 --self-contained\n```\n\n### Test Configuration\n```bash\n# Edit appsettings.json\n# Restart application\n```\n\n## Version Information\n\n- **.NET**: 8.0\n- **NAudio**: 2.2.1+\n- **Target**: Windows 10+\n- **Architecture**: x64\n\n## Contact and Support\n\n- **Documentation**: See docs/ folder\n- **Architecture**: See workspace.dsl\n- **Issues**: Check session.log first\n- **Configuration**: Edit appsettings.json\n",
+      "filename" : "QUICK_REFERENCE.md",
+      "format" : "Markdown",
+      "order" : 2,
+      "title" : ""
+    } ]
+  },
+  "id" : 1,
+  "lastModifiedDate" : "2026-01-28T11:55:15Z",
+  "model" : {
+    "deploymentNodes" : [ {
+      "children" : [ {
+        "environment" : "Production",
+        "id" : "83",
+        "instances" : "1",
+        "name" : "Desktop Environment",
+        "properties" : {
+          "structurizr.dsl.identifier" : "c4f93de2-6a61-4bb3-97ab-68039e33e714"
+        },
+        "softwareSystemInstances" : [ {
+          "deploymentGroups" : [ "Default" ],
+          "environment" : "Production",
+          "id" : "84",
+          "instanceId" : 1,
+          "properties" : {
+            "structurizr.dsl.identifier" : "ffec9eec-51e3-481a-bb24-48e893d318d3"
+          },
+          "softwareSystemId" : "4",
+          "tags" : "Software System Instance"
+        } ],
+        "tags" : "Element,Deployment Node"
+      }, {
+        "environment" : "Production",
+        "id" : "85",
+        "infrastructureNodes" : [ {
+          "description" : "Microphone",
+          "environment" : "Production",
+          "id" : "86",
+          "name" : "microphone",
+          "properties" : {
+            "structurizr.dsl.identifier" : "e2843784-5896-41ed-8a44-e64b9a71e3fc"
+          },
+          "tags" : "Element,Infrastructure Node,Hardware",
+          "technology" : "Audio input device"
+        }, {
+          "description" : "Speakers/Headphones",
+          "environment" : "Production",
+          "id" : "87",
+          "name" : "speakers",
+          "properties" : {
+            "structurizr.dsl.identifier" : "973ae81e-47e3-48b0-a576-120329827aed"
+          },
+          "tags" : "Element,Infrastructure Node,Hardware",
+          "technology" : "Audio output device"
+        } ],
+        "instances" : "1",
+        "name" : "Audio Hardware",
+        "properties" : {
+          "structurizr.dsl.identifier" : "a4f41e58-9460-4a76-ac78-f5bd01349eb5"
+        },
+        "tags" : "Element,Deployment Node",
+        "technology" : "Audio devices"
+      }, {
+        "environment" : "Production",
+        "id" : "88",
+        "infrastructureNodes" : [ {
+          "description" : "My Documents",
+          "environment" : "Production",
+          "id" : "89",
+          "name" : "myDocuments",
+          "properties" : {
+            "structurizr.dsl.identifier" : "9e2e12bd-0c16-4d5c-b652-fa7e12cc53e9"
+          },
+          "tags" : "Element,Infrastructure Node,Storage",
+          "technology" : "User's Documents folder"
+        } ],
+        "instances" : "1",
+        "name" : "Local Storage",
+        "properties" : {
+          "structurizr.dsl.identifier" : "a72c8084-36a2-4970-8307-73d5980432ec"
+        },
+        "tags" : "Element,Deployment Node",
+        "technology" : "NTFS"
+      } ],
+      "environment" : "Production",
+      "id" : "82",
+      "instances" : "1",
+      "name" : "User's Computer",
+      "properties" : {
+        "structurizr.dsl.identifier" : "419d3403-b66d-4517-848e-9e6dd4f864a7"
+      },
+      "tags" : "Element,Deployment Node",
+      "technology" : "Windows 10/11"
+    } ],
+    "people" : [ {
+      "description" : "A person conducting or recording an interview",
+      "id" : "1",
+      "name" : "User",
+      "properties" : {
+        "structurizr.dsl.identifier" : "user"
+      },
+      "relationships" : [ {
+        "description" : "Records interviews using",
+        "destinationId" : "4",
+        "id" : "74",
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "WPF UI"
+      }, {
+        "description" : "Interacts with",
+        "destinationId" : "6",
+        "id" : "77",
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "Mouse/Keyboard"
+      }, {
+        "description" : "Interacts with",
+        "destinationId" : "5",
+        "id" : "78",
+        "linkedRelationshipId" : "77",
+        "sourceId" : "1",
+        "technology" : "Mouse/Keyboard"
+      } ],
+      "tags" : "Element,Person,User"
+    } ],
+    "softwareSystems" : [ {
+      "description" : "Provides audio device access and file system",
+      "documentation" : { },
+      "id" : "2",
+      "name" : "Windows Operating System",
+      "properties" : {
+        "structurizr.dsl.identifier" : "windowsOS"
+      },
+      "tags" : "Element,Software System,External System"
+    }, {
+      "description" : "External audio processing tool for compression and format conversion",
+      "documentation" : { },
+      "id" : "3",
+      "name" : "FFmpeg",
+      "properties" : {
+        "structurizr.dsl.identifier" : "ffmpeg"
+      },
+      "relationships" : [ {
+        "description" : "Writes compressed files",
+        "destinationId" : "49",
+        "id" : "72",
+        "sourceId" : "3",
+        "tags" : "Relationship",
+        "technology" : "File I/O"
+      }, {
+        "description" : "Writes compressed files",
+        "destinationId" : "4",
+        "id" : "73",
+        "linkedRelationshipId" : "72",
+        "sourceId" : "3",
+        "technology" : "File I/O"
+      } ],
+      "tags" : "Element,Software System,External System"
+    }, {
+      "containers" : [ {
+        "components" : [ {
+          "description" : "Main user interface window",
+          "documentation" : { },
+          "id" : "6",
+          "name" : "MainWindow",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mainWindow"
+          },
+          "relationships" : [ {
+            "description" : "Uses",
+            "destinationId" : "7",
+            "id" : "20",
+            "sourceId" : "6",
+            "tags" : "Relationship",
+            "technology" : "Method calls, Events"
+          }, {
+            "description" : "Displays information to",
+            "destinationId" : "1",
+            "id" : "79",
+            "sourceId" : "6",
+            "tags" : "Relationship",
+            "technology" : "UI Updates"
+          } ],
+          "tags" : "Element,Component,UI",
+          "technology" : "WPF Window"
+        }, {
+          "description" : "Coordinates all recording operations and manages application state",
+          "documentation" : { },
+          "id" : "7",
+          "name" : "RecordingOrchestrator",
+          "properties" : {
+            "structurizr.dsl.identifier" : "recordingOrchestrator"
+          },
+          "relationships" : [ {
+            "description" : "Controls recording lifecycle",
+            "destinationId" : "8",
+            "id" : "21",
+            "sourceId" : "7",
+            "tags" : "Relationship",
+            "technology" : "Async methods"
+          }, {
+            "description" : "Persists session state",
+            "destinationId" : "9",
+            "id" : "22",
+            "sourceId" : "7",
+            "tags" : "Relationship",
+            "technology" : "Async methods"
+          }, {
+            "description" : "Creates directories",
+            "destinationId" : "10",
+            "id" : "23",
+            "sourceId" : "7",
+            "tags" : "Relationship",
+            "technology" : "Sync methods"
+          }, {
+            "description" : "Checks for incomplete sessions",
+            "destinationId" : "11",
+            "id" : "24",
+            "sourceId" : "7",
+            "tags" : "Relationship",
+            "technology" : "Async methods"
+          }, {
+            "description" : "Logs events",
+            "destinationId" : "12",
+            "id" : "25",
+            "sourceId" : "7",
+            "tags" : "Relationship",
+            "technology" : "Async methods"
+          }, {
+            "description" : "Reads configuration",
+            "destinationId" : "13",
+            "id" : "26",
+            "sourceId" : "7",
+            "tags" : "Relationship",
+            "technology" : "Sync properties"
+          }, {
+            "description" : "Manages compression",
+            "destinationId" : "14",
+            "id" : "27",
+            "sourceId" : "7",
+            "tags" : "Relationship",
+            "technology" : "Async methods"
+          } ],
+          "tags" : "Element,Component,Orchestrator",
+          "technology" : "Service"
+        }, {
+          "description" : "Manages audio capture lifecycle and chunking",
+          "documentation" : { },
+          "id" : "8",
+          "name" : "AudioCaptureEngine",
+          "properties" : {
+            "structurizr.dsl.identifier" : "audioCaptureEngine"
+          },
+          "relationships" : [ {
+            "description" : "Creates and controls",
+            "destinationId" : "15",
+            "id" : "28",
+            "sourceId" : "8",
+            "tags" : "Relationship",
+            "technology" : "Factory pattern"
+          }, {
+            "description" : "Creates and controls",
+            "destinationId" : "16",
+            "id" : "29",
+            "sourceId" : "8",
+            "tags" : "Relationship",
+            "technology" : "Factory pattern"
+          }, {
+            "description" : "Creates and controls",
+            "destinationId" : "17",
+            "id" : "30",
+            "sourceId" : "8",
+            "tags" : "Relationship",
+            "technology" : "Factory pattern"
+          }, {
+            "description" : "Writes audio chunks",
+            "destinationId" : "10",
+            "id" : "31",
+            "sourceId" : "8",
+            "tags" : "Relationship",
+            "technology" : "Direct calls"
+          }, {
+            "description" : "Auto-saves state",
+            "destinationId" : "9",
+            "id" : "32",
+            "sourceId" : "8",
+            "tags" : "Relationship",
+            "technology" : "Async calls"
+          }, {
+            "description" : "Queues compression",
+            "destinationId" : "14",
+            "id" : "33",
+            "sourceId" : "8",
+            "tags" : "Relationship",
+            "technology" : "Async calls"
+          }, {
+            "description" : "Stops audio capture",
+            "destinationId" : "2",
+            "id" : "48",
+            "sourceId" : "8",
+            "tags" : "Relationship",
+            "technology" : "NAudio API"
+          } ],
+          "tags" : "Element,Component,Core",
+          "technology" : "Service"
+        }, {
+          "description" : "Persists and recovers recording session state",
+          "documentation" : { },
+          "id" : "9",
+          "name" : "StateManager",
+          "properties" : {
+            "structurizr.dsl.identifier" : "stateManager"
+          },
+          "relationships" : [ {
+            "description" : "Gets metadata path",
+            "destinationId" : "10",
+            "id" : "38",
+            "sourceId" : "9",
+            "tags" : "Relationship",
+            "technology" : "Method calls"
+          }, {
+            "description" : "Serializes/Deserializes",
+            "destinationId" : "18",
+            "id" : "39",
+            "sourceId" : "9",
+            "tags" : "Relationship",
+            "technology" : "JSON"
+          } ],
+          "tags" : "Element,Component,Core",
+          "technology" : "Service"
+        }, {
+          "description" : "Manages file I/O operations and audio merging",
+          "documentation" : { },
+          "id" : "10",
+          "name" : "FileManager",
+          "properties" : {
+            "structurizr.dsl.identifier" : "fileManager"
+          },
+          "relationships" : [ {
+            "description" : "Reads chunk list",
+            "destinationId" : "18",
+            "id" : "34",
+            "sourceId" : "10",
+            "tags" : "Relationship",
+            "technology" : "Property access"
+          }, {
+            "description" : "Reads and writes files",
+            "destinationId" : "49",
+            "id" : "71",
+            "sourceId" : "10",
+            "tags" : "Relationship",
+            "technology" : "File I/O"
+          } ],
+          "tags" : "Element,Component,Core",
+          "technology" : "Service"
+        }, {
+          "description" : "Handles crash recovery and incomplete sessions",
+          "documentation" : { },
+          "id" : "11",
+          "name" : "RecoveryManager",
+          "properties" : {
+            "structurizr.dsl.identifier" : "recoveryManager"
+          },
+          "relationships" : [ {
+            "description" : "Scans directories",
+            "destinationId" : "10",
+            "id" : "40",
+            "sourceId" : "11",
+            "tags" : "Relationship",
+            "technology" : "Method calls"
+          }, {
+            "description" : "Loads session state",
+            "destinationId" : "9",
+            "id" : "41",
+            "sourceId" : "11",
+            "tags" : "Relationship",
+            "technology" : "Method calls"
+          } ],
+          "tags" : "Element,Component,Core",
+          "technology" : "Service"
+        }, {
+          "description" : "Manages application logging",
+          "documentation" : { },
+          "id" : "12",
+          "name" : "LogManager",
+          "properties" : {
+            "structurizr.dsl.identifier" : "logManager"
+          },
+          "tags" : "Element,Component,Core",
+          "technology" : "Service"
+        }, {
+          "description" : "Loads and manages application configuration",
+          "documentation" : { },
+          "id" : "13",
+          "name" : "ConfigurationManager",
+          "properties" : {
+            "structurizr.dsl.identifier" : "configManager"
+          },
+          "relationships" : [ {
+            "description" : "Deserializes to",
+            "destinationId" : "19",
+            "id" : "42",
+            "sourceId" : "13",
+            "tags" : "Relationship",
+            "technology" : "JSON"
+          } ],
+          "tags" : "Element,Component,Core",
+          "technology" : "Service"
+        }, {
+          "description" : "Manages FFmpeg process for audio compression",
+          "documentation" : { },
+          "id" : "14",
+          "name" : "FFmpegService",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ffmpegService"
+          },
+          "relationships" : [ {
+            "description" : "Executes",
+            "destinationId" : "3",
+            "id" : "35",
+            "sourceId" : "14",
+            "tags" : "Relationship",
+            "technology" : "Process.Start"
+          } ],
+          "tags" : "Element,Component,Integration",
+          "technology" : "Service"
+        }, {
+          "description" : "Captures audio from microphone",
+          "documentation" : { },
+          "id" : "15",
+          "name" : "MicrophoneCapture",
+          "properties" : {
+            "structurizr.dsl.identifier" : "microphoneCapture"
+          },
+          "relationships" : [ {
+            "description" : "Captures from device",
+            "destinationId" : "2",
+            "id" : "43",
+            "sourceId" : "15",
+            "tags" : "Relationship",
+            "technology" : "NAudio WaveInEvent"
+          } ],
+          "tags" : "Element,Component,Audio",
+          "technology" : "IAudioCapture Implementation"
+        }, {
+          "description" : "Captures system audio via loopback",
+          "documentation" : { },
+          "id" : "16",
+          "name" : "LoopbackCapture",
+          "properties" : {
+            "structurizr.dsl.identifier" : "loopbackCapture"
+          },
+          "relationships" : [ {
+            "description" : "Captures loopback",
+            "destinationId" : "2",
+            "id" : "46",
+            "sourceId" : "16",
+            "tags" : "Relationship",
+            "technology" : "NAudio WasapiLoopbackCapture"
+          } ],
+          "tags" : "Element,Component,Audio",
+          "technology" : "IAudioCapture Implementation"
+        }, {
+          "description" : "Captures both microphone and system audio",
+          "documentation" : { },
+          "id" : "17",
+          "name" : "MixedCapture",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mixedCapture"
+          },
+          "relationships" : [ {
+            "description" : "Captures both sources",
+            "destinationId" : "2",
+            "id" : "47",
+            "sourceId" : "17",
+            "tags" : "Relationship",
+            "technology" : "NAudio WaveInEvent + WasapiLoopbackCapture"
+          } ],
+          "tags" : "Element,Component,Audio",
+          "technology" : "IAudioCapture Implementation"
+        }, {
+          "description" : "Session state and metadata",
+          "documentation" : { },
+          "id" : "18",
+          "name" : "RecordingSession",
+          "properties" : {
+            "structurizr.dsl.identifier" : "recordingSession"
+          },
+          "tags" : "Element,Component,Model",
+          "technology" : "Data Model"
+        }, {
+          "description" : "Audio configuration settings",
+          "documentation" : { },
+          "id" : "19",
+          "name" : "AudioConfig",
+          "properties" : {
+            "structurizr.dsl.identifier" : "audioConfig"
+          },
+          "tags" : "Element,Component,Model",
+          "technology" : "Data Model"
+        } ],
+        "description" : "Desktop UI application",
+        "documentation" : { },
+        "id" : "5",
+        "name" : "WPF Application",
+        "properties" : {
+          "structurizr.dsl.identifier" : "wpfApp"
+        },
+        "relationships" : [ {
+          "description" : "Executes",
+          "destinationId" : "3",
+          "id" : "36",
+          "linkedRelationshipId" : "35",
+          "sourceId" : "5",
+          "technology" : "Process.Start"
+        }, {
+          "description" : "Captures from device",
+          "destinationId" : "2",
+          "id" : "44",
+          "linkedRelationshipId" : "43",
+          "sourceId" : "5",
+          "technology" : "NAudio WaveInEvent"
+        }, {
+          "description" : "Reads/Writes",
+          "destinationId" : "49",
+          "id" : "67",
+          "sourceId" : "5",
+          "tags" : "Relationship",
+          "technology" : "File I/O"
+        }, {
+          "description" : "Reads configuration",
+          "destinationId" : "66",
+          "id" : "68",
+          "sourceId" : "5",
+          "tags" : "Relationship",
+          "technology" : "File I/O"
+        }, {
+          "description" : "Accesses audio devices",
+          "destinationId" : "2",
+          "id" : "69",
+          "sourceId" : "5",
+          "tags" : "Relationship",
+          "technology" : "NAudio Library"
+        }, {
+          "description" : "Invokes for compression",
+          "destinationId" : "3",
+          "id" : "70",
+          "sourceId" : "5",
+          "tags" : "Relationship",
+          "technology" : "Process execution"
+        }, {
+          "description" : "Displays information to",
+          "destinationId" : "1",
+          "id" : "80",
+          "linkedRelationshipId" : "79",
+          "sourceId" : "5",
+          "technology" : "UI Updates"
+        } ],
+        "tags" : "Element,Container,Desktop Application",
+        "technology" : "C# .NET 8, WPF"
+      }, {
+        "components" : [ {
+          "description" : "Root folder for all recordings",
+          "documentation" : { },
+          "id" : "50",
+          "name" : "Recordings Folder",
+          "properties" : {
+            "structurizr.dsl.identifier" : "recordingsFolder"
+          },
+          "relationships" : [ {
+            "description" : "Contains multiple",
+            "destinationId" : "51",
+            "id" : "59",
+            "sourceId" : "50",
+            "tags" : "Relationship",
+            "technology" : "1:N"
+          } ],
+          "tags" : "Element,Component,Storage",
+          "technology" : "Directory"
+        }, {
+          "description" : "Individual session directory",
+          "documentation" : { },
+          "id" : "51",
+          "name" : "Session Folder",
+          "properties" : {
+            "structurizr.dsl.identifier" : "sessionFolder"
+          },
+          "relationships" : [ {
+            "description" : "Contains",
+            "destinationId" : "52",
+            "id" : "60",
+            "sourceId" : "51",
+            "tags" : "Relationship",
+            "technology" : "1:1"
+          }, {
+            "description" : "Contains",
+            "destinationId" : "53",
+            "id" : "61",
+            "sourceId" : "51",
+            "tags" : "Relationship",
+            "technology" : "1:1"
+          }, {
+            "description" : "Contains",
+            "destinationId" : "54",
+            "id" : "62",
+            "sourceId" : "51",
+            "tags" : "Relationship",
+            "technology" : "1:1"
+          }, {
+            "description" : "Contains (after merge)",
+            "destinationId" : "57",
+            "id" : "63",
+            "sourceId" : "51",
+            "tags" : "Relationship",
+            "technology" : "1:1"
+          } ],
+          "tags" : "Element,Component,Storage",
+          "technology" : "Directory"
+        }, {
+          "description" : "Temporary audio chunk files",
+          "documentation" : { },
+          "id" : "52",
+          "name" : "Chunks Folder",
+          "properties" : {
+            "structurizr.dsl.identifier" : "chunksFolder"
+          },
+          "relationships" : [ {
+            "description" : "Contains multiple",
+            "destinationId" : "56",
+            "id" : "64",
+            "sourceId" : "52",
+            "tags" : "Relationship",
+            "technology" : "1:N"
+          }, {
+            "description" : "Contains multiple (if enabled)",
+            "destinationId" : "58",
+            "id" : "65",
+            "sourceId" : "52",
+            "tags" : "Relationship",
+            "technology" : "1:N"
+          } ],
+          "tags" : "Element,Component,Storage",
+          "technology" : "Directory"
+        }, {
+          "description" : "Session state and metadata",
+          "documentation" : { },
+          "id" : "53",
+          "name" : "metadata.json",
+          "properties" : {
+            "structurizr.dsl.identifier" : "metadataFile"
+          },
+          "tags" : "Element,Component,Storage",
+          "technology" : "JSON File"
+        }, {
+          "description" : "Session event log",
+          "documentation" : { },
+          "id" : "54",
+          "name" : "session.log",
+          "properties" : {
+            "structurizr.dsl.identifier" : "logFile"
+          },
+          "tags" : "Element,Component,Storage",
+          "technology" : "Text File"
+        }, {
+          "description" : "Application configuration",
+          "documentation" : { },
+          "id" : "55",
+          "name" : "appsettings.json",
+          "properties" : {
+            "structurizr.dsl.identifier" : "configFile"
+          },
+          "tags" : "Element,Component,Storage",
+          "technology" : "JSON File"
+        }, {
+          "description" : "Raw WAV chunks",
+          "documentation" : { },
+          "id" : "56",
+          "name" : "Audio Chunk Files",
+          "properties" : {
+            "structurizr.dsl.identifier" : "audioChunks"
+          },
+          "tags" : "Element,Component,Storage",
+          "technology" : "WAV Files"
+        }, {
+          "description" : "Merged interview recording",
+          "documentation" : { },
+          "id" : "57",
+          "name" : "Final Audio File",
+          "properties" : {
+            "structurizr.dsl.identifier" : "finalAudio"
+          },
+          "tags" : "Element,Component,Storage",
+          "technology" : "WAV File"
+        }, {
+          "description" : "Compressed audio chunks",
+          "documentation" : { },
+          "id" : "58",
+          "name" : "Compressed Audio Files",
+          "properties" : {
+            "structurizr.dsl.identifier" : "compressedChunks"
+          },
+          "tags" : "Element,Component,Storage",
+          "technology" : "MP3/AAC Files"
+        } ],
+        "description" : "Stores recordings, session state, and logs",
+        "documentation" : { },
+        "id" : "49",
+        "name" : "File System",
+        "properties" : {
+          "structurizr.dsl.identifier" : "fileSystem"
+        },
+        "tags" : "Element,Container,Storage",
+        "technology" : "Windows File System"
+      }, {
+        "description" : "Application settings file",
+        "documentation" : { },
+        "id" : "66",
+        "name" : "Configuration Storage",
+        "properties" : {
+          "structurizr.dsl.identifier" : "configStorage"
+        },
+        "tags" : "Element,Container,Configuration",
+        "technology" : "JSON File"
+      } ],
+      "description" : "Desktop application for recording and managing interview audio with crash recovery",
+      "documentation" : { },
+      "id" : "4",
+      "name" : "Interview Recorder",
+      "properties" : {
+        "structurizr.dsl.identifier" : "interviewRecorder"
+      },
+      "relationships" : [ {
+        "description" : "Executes",
+        "destinationId" : "3",
+        "id" : "37",
+        "linkedRelationshipId" : "35",
+        "sourceId" : "4",
+        "technology" : "Process.Start"
+      }, {
+        "description" : "Captures from device",
+        "destinationId" : "2",
+        "id" : "45",
+        "linkedRelationshipId" : "43",
+        "sourceId" : "4",
+        "technology" : "NAudio WaveInEvent"
+      }, {
+        "description" : "Uses audio devices from",
+        "destinationId" : "2",
+        "id" : "75",
+        "sourceId" : "4",
+        "tags" : "Relationship",
+        "technology" : "NAudio API"
+      }, {
+        "description" : "Compresses audio using",
+        "destinationId" : "3",
+        "id" : "76",
+        "sourceId" : "4",
+        "tags" : "Relationship",
+        "technology" : "Command-line execution"
+      }, {
+        "description" : "Displays information to",
+        "destinationId" : "1",
+        "id" : "81",
+        "linkedRelationshipId" : "79",
+        "sourceId" : "4",
+        "technology" : "UI Updates"
+      } ],
+      "tags" : "Element,Software System"
+    } ]
+  },
+  "name" : "Interview Recorder",
+  "properties" : {
+    "structurizr.inspection.error" : "24",
+    "structurizr.inspection.info" : "0",
+    "structurizr.inspection.ignore" : "0",
+    "structurizr.inspection.warning" : "0"
+  },
+  "views" : {
+    "componentViews" : [ {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "5",
+      "description" : "Component diagram showing all components within the WPF application",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "12",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "13",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "14",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "15",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "16",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "17",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "18",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "19",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "49",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "Components-Overview",
+      "name" : "Component View: Interview Recorder - WPF Application",
+      "order" : 3,
+      "relationships" : [ {
+        "id" : "20"
+      }, {
+        "id" : "21"
+      }, {
+        "id" : "22"
+      }, {
+        "id" : "23"
+      }, {
+        "id" : "24"
+      }, {
+        "id" : "25"
+      }, {
+        "id" : "26"
+      }, {
+        "id" : "27"
+      }, {
+        "id" : "28"
+      }, {
+        "id" : "29"
+      }, {
+        "id" : "30"
+      }, {
+        "id" : "31"
+      }, {
+        "id" : "32"
+      }, {
+        "id" : "33"
+      }, {
+        "id" : "34"
+      }, {
+        "id" : "35"
+      }, {
+        "id" : "38"
+      }, {
+        "id" : "39"
+      }, {
+        "id" : "40"
+      }, {
+        "id" : "41"
+      }, {
+        "id" : "42"
+      }, {
+        "id" : "43"
+      }, {
+        "id" : "46"
+      }, {
+        "id" : "47"
+      }, {
+        "id" : "48"
+      }, {
+        "id" : "71"
+      }, {
+        "id" : "72"
+      }, {
+        "id" : "77"
+      }, {
+        "id" : "79"
+      } ]
+    }, {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "5",
+      "description" : "Core service components and their relationships",
+      "elements" : [ {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "12",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "13",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "14",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "18",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "19",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "Components-CoreServices",
+      "name" : "Component View: Interview Recorder - WPF Application",
+      "order" : 4,
+      "relationships" : [ {
+        "id" : "20"
+      }, {
+        "id" : "21"
+      }, {
+        "id" : "22"
+      }, {
+        "id" : "23"
+      }, {
+        "id" : "24"
+      }, {
+        "id" : "25"
+      }, {
+        "id" : "26"
+      }, {
+        "id" : "27"
+      }, {
+        "id" : "31"
+      }, {
+        "id" : "32"
+      }, {
+        "id" : "33"
+      }, {
+        "id" : "34"
+      }, {
+        "id" : "38"
+      }, {
+        "id" : "39"
+      }, {
+        "id" : "40"
+      }, {
+        "id" : "41"
+      }, {
+        "id" : "42"
+      } ]
+    }, {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "5",
+      "description" : "Audio capture subsystem showing capture implementations",
+      "elements" : [ {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "14",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "15",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "16",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "17",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "Components-AudioCapture",
+      "name" : "Component View: Interview Recorder - WPF Application",
+      "order" : 5,
+      "relationships" : [ {
+        "id" : "28"
+      }, {
+        "id" : "29"
+      }, {
+        "id" : "30"
+      }, {
+        "id" : "31"
+      }, {
+        "id" : "33"
+      }, {
+        "id" : "43"
+      }, {
+        "id" : "46"
+      }, {
+        "id" : "47"
+      }, {
+        "id" : "48"
+      } ]
+    }, {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "5",
+      "description" : "State management and crash recovery subsystem",
+      "elements" : [ {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "18",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "Components-StateManagement",
+      "name" : "Component View: Interview Recorder - WPF Application",
+      "order" : 6,
+      "relationships" : [ {
+        "id" : "22"
+      }, {
+        "id" : "23"
+      }, {
+        "id" : "24"
+      }, {
+        "id" : "34"
+      }, {
+        "id" : "38"
+      }, {
+        "id" : "39"
+      }, {
+        "id" : "40"
+      }, {
+        "id" : "41"
+      } ]
+    } ],
+    "configuration" : {
+      "branding" : { },
+      "lastSavedView" : "SystemContext",
+      "styles" : {
+        "elements" : [ {
+          "background" : "#95e1d3",
+          "color" : "#000000",
+          "shape" : "Component",
+          "tag" : "Audio"
+        }, {
+          "background" : "#85bbf0",
+          "color" : "#000000",
+          "shape" : "Component",
+          "tag" : "Component"
+        }, {
+          "background" : "#ffa500",
+          "color" : "#000000",
+          "shape" : "Folder",
+          "tag" : "Configuration"
+        }, {
+          "background" : "#438dd5",
+          "color" : "#ffffff",
+          "shape" : "RoundedBox",
+          "tag" : "Container"
+        }, {
+          "background" : "#4ecdc4",
+          "color" : "#000000",
+          "shape" : "Component",
+          "tag" : "Core"
+        }, {
+          "shape" : "Window",
+          "tag" : "Desktop Application"
+        }, {
+          "background" : "#999999",
+          "color" : "#ffffff",
+          "shape" : "RoundedBox",
+          "tag" : "External System"
+        }, {
+          "background" : "#666666",
+          "color" : "#ffffff",
+          "shape" : "Box",
+          "tag" : "Hardware"
+        }, {
+          "background" : "#ffe66d",
+          "color" : "#000000",
+          "shape" : "Component",
+          "tag" : "Integration"
+        }, {
+          "background" : "#f38181",
+          "color" : "#000000",
+          "shape" : "Box",
+          "tag" : "Model"
+        }, {
+          "background" : "#ff6b6b",
+          "color" : "#ffffff",
+          "shape" : "Hexagon",
+          "tag" : "Orchestrator"
+        }, {
+          "background" : "#08427b",
+          "color" : "#ffffff",
+          "shape" : "Person",
+          "tag" : "Person"
+        }, {
+          "background" : "#1168bd",
+          "color" : "#ffffff",
+          "shape" : "RoundedBox",
+          "tag" : "Software System"
+        }, {
+          "background" : "#85bbf0",
+          "color" : "#000000",
+          "shape" : "Cylinder",
+          "tag" : "Storage"
+        }, {
+          "background" : "#b3d9ff",
+          "color" : "#000000",
+          "shape" : "Component",
+          "tag" : "UI"
+        }, {
+          "background" : "#08427b",
+          "color" : "#ffffff",
+          "shape" : "Person",
+          "tag" : "User"
+        } ]
+      },
+      "terminology" : { },
+      "themes" : [ "https://static.structurizr.com/themes/default/theme.json" ]
+    },
+    "containerViews" : [ {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "description" : "Container diagram showing the high-level technical building blocks",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "49",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "66",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "key" : "Containers",
+      "name" : "Container View: Interview Recorder",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "36"
+      }, {
+        "id" : "44"
+      }, {
+        "id" : "67"
+      }, {
+        "id" : "68"
+      }, {
+        "id" : "69"
+      }, {
+        "id" : "70"
+      }, {
+        "id" : "72"
+      }, {
+        "id" : "78"
+      }, {
+        "id" : "80"
+      } ],
+      "softwareSystemId" : "4"
+    } ],
+    "deploymentViews" : [ {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "description" : "Production deployment architecture",
+      "elements" : [ {
+        "id" : "82",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "85",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "86",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "87",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "88",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "89",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "environment" : "Production",
+      "key" : "Deployment",
+      "name" : "Deployment View: Interview Recorder - Production",
+      "order" : 11,
+      "softwareSystemId" : "4"
+    } ],
+    "dynamicViews" : [ {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "description" : "Sequence of operations when user starts recording",
+      "elementId" : "5",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "13",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "15",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "StartRecording",
+      "name" : "Dynamic View: Interview Recorder - WPF Application",
+      "order" : 7,
+      "relationships" : [ {
+        "description" : "1. Clicks Start Recording",
+        "id" : "77",
+        "order" : "1",
+        "response" : false
+      }, {
+        "description" : "2. StartRecordingAsync()",
+        "id" : "20",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "3. CreateSessionDirectory()",
+        "id" : "23",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "4. Get CurrentAudioConfig",
+        "id" : "26",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "5. SaveStateAsync()",
+        "id" : "22",
+        "order" : "5",
+        "response" : false
+      }, {
+        "description" : "6. StartRecording()",
+        "id" : "21",
+        "order" : "6",
+        "response" : false
+      }, {
+        "description" : "7. Create IAudioCapture",
+        "id" : "28",
+        "order" : "7",
+        "response" : false
+      }, {
+        "description" : "8. Start capturing audio",
+        "id" : "43",
+        "order" : "8",
+        "response" : false
+      }, {
+        "description" : "9. Create first chunk file",
+        "id" : "31",
+        "order" : "9",
+        "response" : false
+      }, {
+        "description" : "10. Raise StateChanged event",
+        "id" : "20",
+        "order" : "10",
+        "response" : true
+      }, {
+        "description" : "11. Update UI (show recording)",
+        "id" : "79",
+        "order" : "11",
+        "response" : false
+      } ]
+    }, {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "description" : "Continuous flow of audio data during recording",
+      "elementId" : "5",
+      "elements" : [ {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "14",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "15",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "49",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "AudioDataFlow",
+      "name" : "Dynamic View: Interview Recorder - WPF Application",
+      "order" : 8,
+      "relationships" : [ {
+        "description" : "1. Audio data available",
+        "id" : "43",
+        "order" : "1",
+        "response" : true
+      }, {
+        "description" : "2. OnDataAvailable event",
+        "id" : "28",
+        "order" : "2",
+        "response" : true
+      }, {
+        "description" : "3. Write to chunk file",
+        "id" : "31",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "4. Auto-save state (periodic)",
+        "id" : "32",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "5. Queue compression (on chunk complete)",
+        "id" : "33",
+        "order" : "5",
+        "response" : false
+      }, {
+        "description" : "6. Execute compression",
+        "id" : "35",
+        "order" : "6",
+        "response" : false
+      }, {
+        "description" : "7. Write compressed file",
+        "id" : "72",
+        "order" : "7",
+        "response" : false
+      } ]
+    }, {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "description" : "Sequence of operations when stopping and finalizing recording",
+      "elementId" : "5",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "14",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "49",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "StopRecording",
+      "name" : "Dynamic View: Interview Recorder - WPF Application",
+      "order" : 9,
+      "relationships" : [ {
+        "description" : "1. Clicks Stop Recording",
+        "id" : "77",
+        "order" : "1",
+        "response" : false
+      }, {
+        "description" : "2. StopRecordingAsync()",
+        "id" : "20",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "3. StopRecording()",
+        "id" : "21",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "4. Stop audio capture",
+        "id" : "48",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "5. Stop() - wait for queue",
+        "id" : "27",
+        "order" : "5",
+        "response" : false
+      }, {
+        "description" : "6. Process remaining chunks",
+        "id" : "35",
+        "order" : "6",
+        "response" : false
+      }, {
+        "description" : "7. MergeChunksAsync()",
+        "id" : "23",
+        "order" : "7",
+        "response" : false
+      }, {
+        "description" : "8. Read all chunk files",
+        "id" : "71",
+        "order" : "8",
+        "response" : false
+      }, {
+        "description" : "9. Write final merged file",
+        "id" : "71",
+        "order" : "9",
+        "response" : false
+      }, {
+        "description" : "10. Mark session complete",
+        "id" : "22",
+        "order" : "10",
+        "response" : false
+      }, {
+        "description" : "11. Return final file path",
+        "id" : "20",
+        "order" : "11",
+        "response" : true
+      }, {
+        "description" : "12. Show completion dialog",
+        "id" : "79",
+        "order" : "12",
+        "response" : false
+      } ]
+    }, {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "description" : "Process of detecting and recovering from application crash",
+      "elementId" : "5",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "CrashRecovery",
+      "name" : "Dynamic View: Interview Recorder - WPF Application",
+      "order" : 10,
+      "relationships" : [ {
+        "description" : "1. CheckForIncompleteSessionAsync()",
+        "id" : "20",
+        "order" : "1",
+        "response" : false
+      }, {
+        "description" : "2. FindIncompleteSessionAsync()",
+        "id" : "24",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "3. Scan session directories",
+        "id" : "40",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "4. Load session metadata",
+        "id" : "41",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "5. Return incomplete session",
+        "id" : "24",
+        "order" : "5",
+        "response" : true
+      }, {
+        "description" : "6. Return session details",
+        "id" : "20",
+        "order" : "6",
+        "response" : true
+      }, {
+        "description" : "7. Show recovery prompt",
+        "id" : "79",
+        "order" : "7",
+        "response" : false
+      }, {
+        "description" : "8. User confirms recovery",
+        "id" : "77",
+        "order" : "8",
+        "response" : false
+      }, {
+        "description" : "9. RecoverSessionAsync()",
+        "id" : "20",
+        "order" : "9",
+        "response" : false
+      }, {
+        "description" : "10. InitializeForRecovery()",
+        "id" : "21",
+        "order" : "10",
+        "response" : false
+      }, {
+        "description" : "11. Raise StateChanged",
+        "id" : "20",
+        "order" : "11",
+        "response" : true
+      }, {
+        "description" : "12. Show recovered session",
+        "id" : "79",
+        "order" : "12",
+        "response" : false
+      } ]
+    } ],
+    "systemContextViews" : [ {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "description" : "System context diagram for Interview Recorder showing external dependencies",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "key" : "SystemContext",
+      "name" : "System Context View: Interview Recorder",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "37"
+      }, {
+        "id" : "45"
+      }, {
+        "id" : "73"
+      }, {
+        "id" : "74"
+      }, {
+        "id" : "75"
+      }, {
+        "id" : "76"
+      }, {
+        "id" : "81"
+      } ],
+      "softwareSystemId" : "4"
+    } ]
+  }
+}

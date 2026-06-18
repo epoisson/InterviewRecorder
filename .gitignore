@@ -1,0 +1,20 @@
+# Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+
+# Rider / VS
+.vs/
+.idea/
+
+# Structurizr generated cache
+Doc/.structurizr/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Stray backups
+*.cs_backup
