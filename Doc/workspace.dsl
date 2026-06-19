@@ -10,7 +10,10 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
         
         # Main System
         interviewRecorder = softwareSystem "Interview Recorder" "Desktop application for recording and managing interview audio with crash recovery" {
-            
+
+            !docs docs
+            !adrs adrs
+
             # Containers
             wpfApp = container "WPF Application" "Desktop UI application" "C# .NET 9, WPF" "Desktop Application" {
 
@@ -90,32 +93,11 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
                 recoveryManager -> recordingOrchestrator "Returns incomplete session" "Return value"
             }
             
-            # File System Storage
-            fileSystem = container "File System" "Stores recordings, session state, and logs" "Windows File System" "Storage" {
-                recordingsFolder = component "Recordings Folder" "Root folder for all recordings" "Directory" "Storage"
-                sessionFolder = component "Session Folder" "Individual session directory" "Directory" "Storage"
-                chunksFolder = component "Chunks Folder" "Temporary audio chunk files" "Directory" "Storage"
-                metadataFile = component "metadata.json" "Session state and metadata" "JSON File" "Storage"
-                logFile = component "session.log" "Session event log" "Text File" "Storage"
-                configFile = component "appsettings.json" "Application configuration" "JSON File" "Storage"
-                audioChunks = component "Audio Chunk Files" "Raw WAV chunks" "WAV Files" "Storage"
-                finalAudio = component "Final WAV File" "Merged interview recording" "WAV File" "Storage"
-                compressedChunks = component "Compressed Chunk Files" "Per-chunk compressed audio" "m4a Files" "Storage"
-                finalCompressed = component "Final m4a File" "Merged compressed recording" "m4a File" "Storage"
-                
-                # File System Relationships
-                recordingsFolder -> sessionFolder "Contains multiple" "1:N"
-                sessionFolder -> chunksFolder "Contains" "1:1"
-                sessionFolder -> metadataFile "Contains" "1:1"
-                sessionFolder -> logFile "Contains" "1:1"
-                sessionFolder -> finalAudio "Contains (after merge)" "1:1"
-                sessionFolder -> finalCompressed "Contains (after merge, if compression enabled)" "1:1"
-                chunksFolder -> audioChunks "Contains multiple" "1:N"
-                chunksFolder -> compressedChunks "Contains multiple (if enabled)" "1:N"
-            }
-            
+            # File System Storage (per-session folder: chunks/, metadata.json, session.log, merged WAV + m4a)
+            fileSystem = container "File System" "Stores chunk + merged WAV/m4a files, metadata.json, and session.log under Documents\InterviewRecordings" "Windows File System" "Storage"
+
             # External Configuration
-            configStorage = container "Configuration Storage" "Application settings file" "JSON File" "Configuration"
+            configStorage = container "Configuration Storage" "appsettings.json (capture, chunking, compression settings)" "JSON File" "Configuration"
             
             # Container Relationships
             wpfApp -> fileSystem "Reads/Writes" "File I/O"
@@ -141,22 +123,33 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
         
         # Deployment
         deploymentEnvironment "Production" {
-            deploymentNode "User's Computer" "" "Windows 10/11" {
-                deploymentNode "Desktop Environment" "" "" {
-                    softwareSystemInstance interviewRecorder
+            deploymentNode "User's Computer" "The end user's Windows PC" "Windows 10/11" {
+                deploymentNode "Desktop Runtime" "Hosts the WPF application" ".NET 9 Desktop Runtime" {
+                    recorderInstance = softwareSystemInstance interviewRecorder
                 }
-                deploymentNode "Audio Hardware" "" "Audio devices" {
-                    infrastructureNode microphone "Microphone" "Audio input device" "Hardware"
-                    infrastructureNode speakers "Speakers/Headphones" "Audio output device" "Hardware"
+                deploymentNode "Audio Hardware" "Local audio devices" "Windows audio stack" {
+                    microphone = infrastructureNode "Microphone" "Audio input device" "Audio hardware" "Hardware"
+                    speakers = infrastructureNode "Speakers / Headphones" "Audio output device" "Audio hardware" "Hardware"
                 }
-                deploymentNode "Local Storage" "" "NTFS" {
-                    infrastructureNode myDocuments "My Documents" "User's Documents folder" "Storage"
+                deploymentNode "Local Storage" "Where recordings are written" "NTFS volume" {
+                    myDocuments = infrastructureNode "My Documents" "User's Documents folder (InterviewRecordings)" "NTFS" "Storage"
                 }
             }
+
+            recorderInstance -> microphone "Captures from" "WASAPI / WaveIn"
+            recorderInstance -> speakers "Plays back to" "WaveOut"
+            recorderInstance -> myDocuments "Reads and writes recordings" "File I/O"
         }
     }
 
     views {
+        # System Landscape (Level 0)
+        systemLandscape "Landscape" {
+            include *
+            autoLayout lr
+            description "The recorder, its user, and external dependencies (Windows, FFmpeg)."
+        }
+
         # System Context View (Level 1)
         systemContext interviewRecorder "SystemContext" {
             include *
@@ -377,7 +370,7 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
         }
         
         # Themes
-        theme default
+        #theme default
     }
     
     # Documentation

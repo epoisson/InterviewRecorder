@@ -1,6 +1,7 @@
 # Interview Recorder
 
-![Build](https://github.com/etiennepoisson/InterviewRecorder/actions/workflows/build.yml/badge.svg)
+![Build](https://github.com/epoisson/InterviewRecorder/actions/workflows/build.yml/badge.svg)
+![Release](https://github.com/epoisson/InterviewRecorder/actions/workflows/release.yml/badge.svg)
 ![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)
 ![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4.svg)
 
@@ -36,6 +37,28 @@ Windows desktop app for recording interviews to disk as chunked WAV, compressing
 dotnet build
 dotnet run
 ```
+
+## Download
+
+Grab the latest from the [Releases](https://github.com/epoisson/InterviewRecorder/releases) page. Each release attaches a self-contained ZIP per architecture (the .NET runtime is bundled, so no separate install):
+
+- `InterviewRecorder-win-x64.zip` — Intel/AMD (most PCs)
+- `InterviewRecorder-win-arm64.zip` — Windows on ARM
+- `InterviewRecorder-win-x86.zip` — 32-bit
+
+Unzip and run `InterviewRecorder.exe`. (Unsigned, so Windows SmartScreen may warn on first run.) FFmpeg is still required separately for compression.
+
+## Releases and versioning
+
+- Versions are **tag-driven** via [MinVer](https://github.com/adamralph/minver): the version comes from the latest `v*` git tag.
+- Push a tag to cut a release:
+
+  ```bash
+  git tag v0.9.1
+  git push origin v0.9.1
+  ```
+
+  The `release` workflow builds the three self-contained ZIPs and publishes a GitHub Release with auto-generated notes. Untagged CI builds get a prerelease version automatically.
 
 ## Output layout
 
