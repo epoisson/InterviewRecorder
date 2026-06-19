@@ -1,0 +1,62 @@
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Dynamic View: Interview Recorder - WPF Application"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    1["<div style='font-weight: bold'>User</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>A person conducting or<br />recording an interview</div>"]
+    style 1 fill:#08427b,stroke:#052e56,color:#ffffff
+
+    2("<div style='font-weight: bold'>Windows Operating System</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Provides audio device access<br />and file system</div>")
+    style 2 fill:#999999,stroke:#6b6b6b,color:#ffffff
+    3("<div style='font-weight: bold'>FFmpeg</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>External audio processing<br />tool for compression and<br />format conversion</div>")
+    style 3 fill:#999999,stroke:#6b6b6b,color:#ffffff
+
+    subgraph 4 ["Interview Recorder"]
+      style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
+
+      subgraph 5 ["WPF Application"]
+        style 5 fill:#ffffff,stroke:#2e6295,color:#2e6295
+
+        10["<div style='font-weight: bold'>FileManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Manages file I/O operations<br />and audio merging</div>"]
+        style 10 fill:#4ecdc4,stroke:#368f89,color:#000000
+        14["<div style='font-weight: bold'>FFmpegService</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Background queue converting<br />chunks to m4a; merges m4a<br />chunks on stop</div>"]
+        style 14 fill:#ffe66d,stroke:#b2a14c,color:#000000
+        6["<div style='font-weight: bold'>MainWindow</div><div style='font-size: 70%; margin-top: 0px'>[Component: WPF Window]</div><div style='font-size: 80%; margin-top:10px'>Main UI window: menu<br />(View/Device/Config),<br />controls, live waveform,<br />chunks grid, in-app playback</div>"]
+        style 6 fill:#b3d9ff,stroke:#7d97b2,color:#000000
+        7["<div style='font-weight: bold'>RecordingOrchestrator</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Coordinates all recording<br />operations and manages<br />application state</div>"]
+        style 7 fill:#ff6b6b,stroke:#b24a4a,color:#ffffff
+        8["<div style='font-weight: bold'>AudioCaptureEngine</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Writes WAV chunks from<br />capture events, rotates<br />chunks, queues each for<br />conversion, raises peak<br />levels</div>"]
+        style 8 fill:#4ecdc4,stroke:#368f89,color:#000000
+        9["<div style='font-weight: bold'>StateManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Persists and recovers<br />recording session state</div>"]
+        style 9 fill:#4ecdc4,stroke:#368f89,color:#000000
+      end
+
+      53[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json, and<br />session.log under<br />Documents\InterviewRecordings</div>")]
+      style 53 fill:#85bbf0,stroke:#5d82a8,color:#000000
+    end
+
+    1["<div style='font-weight: bold'>User</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>A person conducting or<br />recording an interview</div>"]
+    style 1 fill:#08427b,stroke:#052e56,color:#ffffff
+    2("<div style='font-weight: bold'>Windows Operating System</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Provides audio device access<br />and file system</div>")
+    style 2 fill:#999999,stroke:#6b6b6b,color:#ffffff
+    3("<div style='font-weight: bold'>FFmpeg</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>External audio processing<br />tool for compression and<br />format conversion</div>")
+    style 3 fill:#999999,stroke:#6b6b6b,color:#ffffff
+    53[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json, and<br />session.log under<br />Documents\InterviewRecordings</div>")]
+    style 53 fill:#85bbf0,stroke:#5d82a8,color:#000000
+
+    1-. "<div>1. 1. Clicks Stop Recording</div><div style='font-size: 70%'>[Mouse/Keyboard]</div>" .->6
+    6-. "<div>2. 2. StopRecordingAsync()</div><div style='font-size: 70%'>[Method calls, Events]</div>" .->7
+    7-. "<div>3. 3. StopRecording() (final<br />chunk queued)</div><div style='font-size: 70%'>[Async methods]</div>" .->8
+    8-. "<div>4. 4. Stop audio capture</div><div style='font-size: 70%'>[NAudio API]</div>" .->2
+    7-. "<div>5. 5. Stop() - drain<br />conversion queue</div><div style='font-size: 70%'>[Async methods]</div>" .->14
+    14-. "<div>6. 6. Convert remaining<br />chunks</div><div style='font-size: 70%'>[Process.Start]</div>" .->3
+    7-. "<div>7. 7. MergeChunksAsync() -<br />merge WAV chunks</div><div style='font-size: 70%'>[Sync/Async methods]</div>" .->10
+    10-. "<div>8. 8. Write final WAV</div><div style='font-size: 70%'>[File I/O]</div>" .->53
+    7-. "<div>9. 9. MergeToM4a() - concat<br />m4a chunks</div><div style='font-size: 70%'>[Async methods]</div>" .->14
+    14-. "<div>10. 10. Write final m4a</div><div style='font-size: 70%'>[File I/O]</div>" .->53
+    7-. "<div>11. 11. Mark session complete</div><div style='font-size: 70%'>[Async methods]</div>" .->9
+    7-. "<div>12. 12. Return final file<br />path</div><div style='font-size: 70%'>[Events]</div>" .->6
+    6-. "<div>13. 13. Show completion<br />dialog</div><div style='font-size: 70%'>[UI Updates]</div>" .->1
+
+  end

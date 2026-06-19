@@ -1,0 +1,59 @@
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Component View: Interview Recorder - WPF Application"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    subgraph 4 ["Interview Recorder"]
+      style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
+
+      subgraph 5 ["WPF Application"]
+        style 5 fill:#ffffff,stroke:#2e6295,color:#2e6295
+
+        10["<div style='font-weight: bold'>FileManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Manages file I/O operations<br />and audio merging</div>"]
+        style 10 fill:#4ecdc4,stroke:#368f89,color:#000000
+        11["<div style='font-weight: bold'>RecoveryManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Handles crash recovery and<br />incomplete sessions</div>"]
+        style 11 fill:#4ecdc4,stroke:#368f89,color:#000000
+        12["<div style='font-weight: bold'>LogManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Manages application logging</div>"]
+        style 12 fill:#4ecdc4,stroke:#368f89,color:#000000
+        13["<div style='font-weight: bold'>ConfigurationManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Loads and manages application<br />configuration</div>"]
+        style 13 fill:#4ecdc4,stroke:#368f89,color:#000000
+        14["<div style='font-weight: bold'>FFmpegService</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Background queue converting<br />chunks to m4a; merges m4a<br />chunks on stop</div>"]
+        style 14 fill:#ffe66d,stroke:#b2a14c,color:#000000
+        17["<div style='font-weight: bold'>RecordingSession</div><div style='font-size: 70%; margin-top: 0px'>[Component: Data Model]</div><div style='font-size: 80%; margin-top:10px'>Session state and metadata</div>"]
+        style 17 fill:#f38181,stroke:#aa5a5a,color:#000000
+        18["<div style='font-weight: bold'>AudioConfig</div><div style='font-size: 70%; margin-top: 0px'>[Component: Data Model]</div><div style='font-size: 80%; margin-top:10px'>Audio configuration settings</div>"]
+        style 18 fill:#f38181,stroke:#aa5a5a,color:#000000
+        6["<div style='font-weight: bold'>MainWindow</div><div style='font-size: 70%; margin-top: 0px'>[Component: WPF Window]</div><div style='font-size: 80%; margin-top:10px'>Main UI window: menu<br />(View/Device/Config),<br />controls, live waveform,<br />chunks grid, in-app playback</div>"]
+        style 6 fill:#b3d9ff,stroke:#7d97b2,color:#000000
+        7["<div style='font-weight: bold'>RecordingOrchestrator</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Coordinates all recording<br />operations and manages<br />application state</div>"]
+        style 7 fill:#ff6b6b,stroke:#b24a4a,color:#ffffff
+        8["<div style='font-weight: bold'>AudioCaptureEngine</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Writes WAV chunks from<br />capture events, rotates<br />chunks, queues each for<br />conversion, raises peak<br />levels</div>"]
+        style 8 fill:#4ecdc4,stroke:#368f89,color:#000000
+        9["<div style='font-weight: bold'>StateManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Persists and recovers<br />recording session state</div>"]
+        style 9 fill:#4ecdc4,stroke:#368f89,color:#000000
+      end
+
+    end
+
+    6-. "<div>Uses</div><div style='font-size: 70%'>[Method calls, Events]</div>" .->7
+    7-. "<div>Controls recording lifecycle</div><div style='font-size: 70%'>[Async methods]</div>" .->8
+    7-. "<div>Persists session state</div><div style='font-size: 70%'>[Async methods]</div>" .->9
+    7-. "<div>Creates directories, lists<br />existing chunks, merges WAVs</div><div style='font-size: 70%'>[Sync/Async methods]</div>" .->10
+    7-. "<div>Checks for incomplete<br />sessions</div><div style='font-size: 70%'>[Async methods]</div>" .->11
+    7-. "<div>Logs events</div><div style='font-size: 70%'>[Async methods]</div>" .->12
+    7-. "<div>Reads configuration</div><div style='font-size: 70%'>[Sync properties]</div>" .->13
+    7-. "<div>Manages compression</div><div style='font-size: 70%'>[Async methods]</div>" .->14
+    8-. "<div>Gets chunk paths, merges WAV<br />chunks</div><div style='font-size: 70%'>[Direct calls]</div>" .->10
+    8-. "<div>Queues each closed chunk for<br />conversion</div><div style='font-size: 70%'>[Async calls]</div>" .->14
+    8-. "<div>Raises peak levels for the<br />waveform</div><div style='font-size: 70%'>[AudioPeak event]</div>" .->7
+    10-. "<div>Reads chunk list</div><div style='font-size: 70%'>[Property access]</div>" .->17
+    9-. "<div>Gets metadata path</div><div style='font-size: 70%'>[Method calls]</div>" .->10
+    9-. "<div>Serializes/Deserializes</div><div style='font-size: 70%'>[JSON]</div>" .->17
+    11-. "<div>Scans directories</div><div style='font-size: 70%'>[Method calls]</div>" .->10
+    11-. "<div>Loads session state</div><div style='font-size: 70%'>[Method calls]</div>" .->9
+    13-. "<div>Deserializes to</div><div style='font-size: 70%'>[JSON]</div>" .->18
+    7-. "<div>Raises state, log and level<br />events</div><div style='font-size: 70%'>[Events]</div>" .->6
+    11-. "<div>Returns incomplete session</div><div style='font-size: 70%'>[Return value]</div>" .->7
+
+  end

@@ -1,0 +1,37 @@
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Component View: Interview Recorder - WPF Application"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    subgraph 4 ["Interview Recorder"]
+      style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
+
+      subgraph 5 ["WPF Application"]
+        style 5 fill:#ffffff,stroke:#2e6295,color:#2e6295
+
+        10["<div style='font-weight: bold'>FileManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Manages file I/O operations<br />and audio merging</div>"]
+        style 10 fill:#4ecdc4,stroke:#368f89,color:#000000
+        11["<div style='font-weight: bold'>RecoveryManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Handles crash recovery and<br />incomplete sessions</div>"]
+        style 11 fill:#4ecdc4,stroke:#368f89,color:#000000
+        17["<div style='font-weight: bold'>RecordingSession</div><div style='font-size: 70%; margin-top: 0px'>[Component: Data Model]</div><div style='font-size: 80%; margin-top:10px'>Session state and metadata</div>"]
+        style 17 fill:#f38181,stroke:#aa5a5a,color:#000000
+        7["<div style='font-weight: bold'>RecordingOrchestrator</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Coordinates all recording<br />operations and manages<br />application state</div>"]
+        style 7 fill:#ff6b6b,stroke:#b24a4a,color:#ffffff
+        9["<div style='font-weight: bold'>StateManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Persists and recovers<br />recording session state</div>"]
+        style 9 fill:#4ecdc4,stroke:#368f89,color:#000000
+      end
+
+    end
+
+    7-. "<div>Persists session state</div><div style='font-size: 70%'>[Async methods]</div>" .->9
+    7-. "<div>Creates directories, lists<br />existing chunks, merges WAVs</div><div style='font-size: 70%'>[Sync/Async methods]</div>" .->10
+    7-. "<div>Checks for incomplete<br />sessions</div><div style='font-size: 70%'>[Async methods]</div>" .->11
+    10-. "<div>Reads chunk list</div><div style='font-size: 70%'>[Property access]</div>" .->17
+    9-. "<div>Gets metadata path</div><div style='font-size: 70%'>[Method calls]</div>" .->10
+    9-. "<div>Serializes/Deserializes</div><div style='font-size: 70%'>[JSON]</div>" .->17
+    11-. "<div>Scans directories</div><div style='font-size: 70%'>[Method calls]</div>" .->10
+    11-. "<div>Loads session state</div><div style='font-size: 70%'>[Method calls]</div>" .->9
+    11-. "<div>Returns incomplete session</div><div style='font-size: 70%'>[Return value]</div>" .->7
+
+  end

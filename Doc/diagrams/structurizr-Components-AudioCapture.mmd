@@ -1,0 +1,40 @@
+graph TB
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Component View: Interview Recorder - WPF Application"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    2("<div style='font-weight: bold'>Windows Operating System</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Provides audio device access<br />and file system</div>")
+    style 2 fill:#999999,stroke:#6b6b6b,color:#ffffff
+
+    subgraph 4 ["Interview Recorder"]
+      style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
+
+      subgraph 5 ["WPF Application"]
+        style 5 fill:#ffffff,stroke:#2e6295,color:#2e6295
+
+        10["<div style='font-weight: bold'>FileManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Manages file I/O operations<br />and audio merging</div>"]
+        style 10 fill:#4ecdc4,stroke:#368f89,color:#000000
+        14["<div style='font-weight: bold'>FFmpegService</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Background queue converting<br />chunks to m4a; merges m4a<br />chunks on stop</div>"]
+        style 14 fill:#ffe66d,stroke:#b2a14c,color:#000000
+        15["<div style='font-weight: bold'>MicrophoneCapture</div><div style='font-size: 70%; margin-top: 0px'>[Component: IAudioCapture Implementation]</div><div style='font-size: 80%; margin-top:10px'>Captures audio from<br />microphone</div>"]
+        style 15 fill:#95e1d3,stroke:#689d93,color:#000000
+        16["<div style='font-weight: bold'>LoopbackCapture</div><div style='font-size: 70%; margin-top: 0px'>[Component: IAudioCapture Implementation]</div><div style='font-size: 80%; margin-top:10px'>Captures system audio via<br />loopback</div>"]
+        style 16 fill:#95e1d3,stroke:#689d93,color:#000000
+        8["<div style='font-weight: bold'>AudioCaptureEngine</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Writes WAV chunks from<br />capture events, rotates<br />chunks, queues each for<br />conversion, raises peak<br />levels</div>"]
+        style 8 fill:#4ecdc4,stroke:#368f89,color:#000000
+      end
+
+    end
+
+    8-. "<div>Creates and controls</div><div style='font-size: 70%'>[Factory pattern]</div>" .->15
+    8-. "<div>Creates and controls</div><div style='font-size: 70%'>[Factory pattern]</div>" .->16
+    8-. "<div>Gets chunk paths, merges WAV<br />chunks</div><div style='font-size: 70%'>[Direct calls]</div>" .->10
+    8-. "<div>Queues each closed chunk for<br />conversion</div><div style='font-size: 70%'>[Async calls]</div>" .->14
+    15-. "<div>Captures from device</div><div style='font-size: 70%'>[NAudio WaveInEvent]</div>" .->2
+    16-. "<div>Captures loopback</div><div style='font-size: 70%'>[NAudio WasapiLoopbackCapture]</div>" .->2
+    2-. "<div>Delivers captured audio</div><div style='font-size: 70%'>[NAudio callback]</div>" .->15
+    8-. "<div>Stops audio capture</div><div style='font-size: 70%'>[NAudio API]</div>" .->2
+    15-. "<div>Forwards audio<br />(DataAvailable)</div><div style='font-size: 70%'>[Event]</div>" .->8
+
+  end

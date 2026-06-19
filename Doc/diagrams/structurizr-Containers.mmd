@@ -1,0 +1,36 @@
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Container View: Interview Recorder"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    1["<div style='font-weight: bold'>User</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>A person conducting or<br />recording an interview</div>"]
+    style 1 fill:#08427b,stroke:#052e56,color:#ffffff
+    2("<div style='font-weight: bold'>Windows Operating System</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Provides audio device access<br />and file system</div>")
+    style 2 fill:#999999,stroke:#6b6b6b,color:#ffffff
+    3("<div style='font-weight: bold'>FFmpeg</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>External audio processing<br />tool for compression and<br />format conversion</div>")
+    style 3 fill:#999999,stroke:#6b6b6b,color:#ffffff
+
+    subgraph 4 ["Interview Recorder"]
+      style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
+
+      5["<div style='font-weight: bold'>WPF Application</div><div style='font-size: 70%; margin-top: 0px'>[Container: C# .NET 9, WPF]</div><div style='font-size: 80%; margin-top:10px'>Desktop UI application</div>"]
+      style 5 fill:#438dd5,stroke:#2e6295,color:#ffffff
+      53[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json, and<br />session.log under<br />Documents\InterviewRecordings</div>")]
+      style 53 fill:#85bbf0,stroke:#5d82a8,color:#000000
+      54["<div style='font-weight: bold'>Configuration Storage</div><div style='font-size: 70%; margin-top: 0px'>[Container: JSON File]</div><div style='font-size: 80%; margin-top:10px'>appsettings.json (capture,<br />chunking, compression<br />settings)</div>"]
+      style 54 fill:#ffa500,stroke:#b27300,color:#000000
+    end
+
+    5-. "<div>Converts chunks and<br />concatenates m4a</div><div style='font-size: 70%'>[Process.Start]</div>" .->3
+    5-. "<div>Plays back the recording</div><div style='font-size: 70%'>[NAudio WaveOutEvent]</div>" .->2
+    2-. "<div>Delivers captured audio</div><div style='font-size: 70%'>[NAudio callback]</div>" .->5
+    5-. "<div>Reads/Writes</div><div style='font-size: 70%'>[File I/O]</div>" .->53
+    5-. "<div>Reads configuration</div><div style='font-size: 70%'>[File I/O]</div>" .->54
+    5-. "<div>Accesses audio devices</div><div style='font-size: 70%'>[NAudio Library]</div>" .->2
+    5-. "<div>Invokes for compression</div><div style='font-size: 70%'>[Process execution]</div>" .->3
+    3-. "<div>Writes compressed files</div><div style='font-size: 70%'>[File I/O]</div>" .->53
+    1-. "<div>Interacts with</div><div style='font-size: 70%'>[Mouse/Keyboard]</div>" .->5
+    5-. "<div>Displays information to</div><div style='font-size: 70%'>[UI Updates]</div>" .->1
+
+  end

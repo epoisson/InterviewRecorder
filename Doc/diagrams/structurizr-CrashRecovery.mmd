@@ -1,0 +1,52 @@
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Dynamic View: Interview Recorder - WPF Application"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    1["<div style='font-weight: bold'>User</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>A person conducting or<br />recording an interview</div>"]
+    style 1 fill:#08427b,stroke:#052e56,color:#ffffff
+
+    subgraph 4 ["Interview Recorder"]
+      style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
+
+      subgraph 5 ["WPF Application"]
+        style 5 fill:#ffffff,stroke:#2e6295,color:#2e6295
+
+        10["<div style='font-weight: bold'>FileManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Manages file I/O operations<br />and audio merging</div>"]
+        style 10 fill:#4ecdc4,stroke:#368f89,color:#000000
+        11["<div style='font-weight: bold'>RecoveryManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Handles crash recovery and<br />incomplete sessions</div>"]
+        style 11 fill:#4ecdc4,stroke:#368f89,color:#000000
+        14["<div style='font-weight: bold'>FFmpegService</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Background queue converting<br />chunks to m4a; merges m4a<br />chunks on stop</div>"]
+        style 14 fill:#ffe66d,stroke:#b2a14c,color:#000000
+        6["<div style='font-weight: bold'>MainWindow</div><div style='font-size: 70%; margin-top: 0px'>[Component: WPF Window]</div><div style='font-size: 80%; margin-top:10px'>Main UI window: menu<br />(View/Device/Config),<br />controls, live waveform,<br />chunks grid, in-app playback</div>"]
+        style 6 fill:#b3d9ff,stroke:#7d97b2,color:#000000
+        7["<div style='font-weight: bold'>RecordingOrchestrator</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Coordinates all recording<br />operations and manages<br />application state</div>"]
+        style 7 fill:#ff6b6b,stroke:#b24a4a,color:#ffffff
+        8["<div style='font-weight: bold'>AudioCaptureEngine</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Writes WAV chunks from<br />capture events, rotates<br />chunks, queues each for<br />conversion, raises peak<br />levels</div>"]
+        style 8 fill:#4ecdc4,stroke:#368f89,color:#000000
+        9["<div style='font-weight: bold'>StateManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Persists and recovers<br />recording session state</div>"]
+        style 9 fill:#4ecdc4,stroke:#368f89,color:#000000
+      end
+
+    end
+
+    1["<div style='font-weight: bold'>User</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>A person conducting or<br />recording an interview</div>"]
+    style 1 fill:#08427b,stroke:#052e56,color:#ffffff
+
+    6-. "<div>1. 1.<br />CheckForIncompleteSessionAsync()</div><div style='font-size: 70%'>[Method calls, Events]</div>" .->7
+    7-. "<div>2. 2.<br />FindIncompleteSessionAsync()</div><div style='font-size: 70%'>[Async methods]</div>" .->11
+    11-. "<div>3. 3. Scan session<br />directories</div><div style='font-size: 70%'>[Method calls]</div>" .->10
+    11-. "<div>4. 4. Load session metadata</div><div style='font-size: 70%'>[Method calls]</div>" .->9
+    11-. "<div>5. 5. Return incomplete<br />session</div><div style='font-size: 70%'>[Return value]</div>" .->7
+    7-. "<div>6. 6. Return session details</div><div style='font-size: 70%'>[Events]</div>" .->6
+    6-. "<div>7. 7. Show recovery prompt</div><div style='font-size: 70%'>[UI Updates]</div>" .->1
+    1-. "<div>8. 8. User confirms recovery</div><div style='font-size: 70%'>[Mouse/Keyboard]</div>" .->6
+    6-. "<div>9. 9. RecoverSessionAsync()</div><div style='font-size: 70%'>[Method calls, Events]</div>" .->7
+    7-. "<div>10. 10. List existing chunks<br />on disk</div><div style='font-size: 70%'>[Sync/Async methods]</div>" .->10
+    7-. "<div>11. 11.<br />InitializeForRecovery() (next<br />chunk index)</div><div style='font-size: 70%'>[Async methods]</div>" .->8
+    7-. "<div>12. 12. Re-queue chunks<br />without an m4a</div><div style='font-size: 70%'>[Async methods]</div>" .->14
+    7-. "<div>13. 13. Raise StateChanged<br />(Paused)</div><div style='font-size: 70%'>[Events]</div>" .->6
+    6-. "<div>14. 14. Show recovered<br />session (paused)</div><div style='font-size: 70%'>[UI Updates]</div>" .->1
+
+  end
