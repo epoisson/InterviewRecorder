@@ -144,8 +144,13 @@ namespace InterviewRecorder
 
         private void OnStateChanged()
         {
-            LogMessage($"State changed event received - updating UI");
-            Dispatcher.Invoke(() => UpdateUIState());
+            // StateChanged can be raised from the orchestrator's Timer thread, so marshal the
+            // whole handler (LogMessage and UpdateUIState both touch UI controls).
+            Dispatcher.Invoke(() =>
+            {
+                LogMessage("State changed event received - updating UI");
+                UpdateUIState();
+            });
         }
 
         private void LogMessage(string message)
