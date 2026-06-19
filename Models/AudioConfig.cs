@@ -16,7 +16,7 @@ namespace InterviewRecorder.Models
         public int SampleRate { get; set; } = 44100;
         public int Channels { get; set; } = 1;
         public int BitsPerSample { get; set; } = 16;
-        public int ChunkDurationMinutes { get; set; } = 5;
+        public int ChunkDurationMinutes { get; set; } = 1;
         public int AutoSaveIntervalSeconds { get; set; } = 30;
         public CompressionConfig Compression { get; set; } = new CompressionConfig();
 

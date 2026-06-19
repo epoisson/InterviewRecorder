@@ -157,7 +157,7 @@ namespace InterviewRecorder.Services
                 // Validate chunk duration
                 if (config.ChunkDurationMinutes < 1 || config.ChunkDurationMinutes > 60)
                 {
-                    config.ChunkDurationMinutes = 5;
+                    config.ChunkDurationMinutes = 1;
                 }
 
                 // Validate auto-save interval

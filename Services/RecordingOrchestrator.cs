@@ -107,11 +107,10 @@ namespace InterviewRecorder.Services
         
         private void OnDurationTimerElapsed(object? sender, ElapsedEventArgs e)
         {
+            // Only refresh the duration value. The UI polls CurrentDuration via its own
+            // DispatcherTimer; firing StateChanged here would rebuild the whole UI 10x/second.
             if (_currentSession?.State == RecordingState.Recording)
-            {
                 _currentSession.Duration = _accumulatedDuration + (DateTime.Now - _segmentStartTime);
-                StateChanged?.Invoke(); // Notify UI to update
-            }
         }
 
         private async void CheckFFmpegAvailability()
