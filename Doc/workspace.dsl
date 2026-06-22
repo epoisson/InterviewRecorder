@@ -1,5 +1,9 @@
 workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Application" {
 
+    # Relationships are declared explicitly at each level (component + container), so don't
+    # auto-create implied ones (which would collide with the explicit container relationships).
+    !impliedRelationships false
+
     model {
         # People
         user = person "User" "A person conducting or recording an interview" "User"
@@ -97,7 +101,6 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             core -> ffmpeg "Converts and merges audio" "Process execution"
             core -> fileSystem "Reads and writes recordings" "File I/O"
             core -> configStorage "Reads, saves and watches settings" "File I/O"
-            ffmpeg -> fileSystem "Writes compressed files" "File I/O"
         }
 
         # System Context
