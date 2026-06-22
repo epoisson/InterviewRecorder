@@ -25,20 +25,39 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
 
             # ---- Container: reusable recording core (no UI dependency) ----
             core = container "Recording Core" "Reusable recording engine, capture modes, persistence and configuration" "C# .NET 9 class library" "Library" {
-                irecorder = component "IRecorder" "Recording surface the UI binds to: start/pause/resume/stop, recovery, status and events" "C# interface" "Contract"
+                # Central coordinator
                 recordingOrchestrator = component "RecordingOrchestrator" "Coordinates a session and raises UI events; implements IRecorder" "Service" "Orchestrator"
-                audioCaptureEngine = component "AudioCaptureEngine" "Writes WAV chunks from capture events, rotates chunks, queues each for conversion, raises peak levels" "Service" "Core"
-                stateManager = component "StateManager" "Persists and recovers recording session state" "Service" "Core"
-                fileManager = component "FileManager" "File I/O: session folders, chunk paths, listing and merging WAVs" "Service" "Core"
-                recoveryManager = component "RecoveryManager" "Finds and loads incomplete sessions" "Service" "Core"
-                logManager = component "LogManager" "Session logging" "Service" "Core"
-                configManager = component "ConfigurationManager" "Loads, validates, watches and saves configuration" "Service" "Core"
-                ffmpegService = component "FFmpegService" "Background queue converting chunks to m4a; merges m4a chunks on stop" "Service" "Integration"
-                iaudiocapture = component "IAudioCapture" "Capture-source abstraction: raises DataAvailable and exposes the capture format" "C# interface" "Contract"
-                microphoneCapture = component "MicrophoneCapture" "Captures audio from microphone" "IAudioCapture Implementation" "Audio"
-                loopbackCapture = component "LoopbackCapture" "Captures system audio via loopback" "IAudioCapture Implementation" "Audio"
-                recordingSession = component "RecordingSession" "Session state and metadata" "Data Model" "Model"
-                audioConfig = component "AudioConfig" "Audio configuration settings" "Data Model" "Model"
+
+                group "Contracts" {
+                    irecorder = component "IRecorder" "Recording surface the UI binds to: start/pause/resume/stop, recovery, status and events" "C# interface" "Contract"
+                    iaudiocapture = component "IAudioCapture" "Capture-source abstraction: raises DataAvailable and exposes the capture format" "C# interface" "Contract"
+                }
+
+                group "Capture" {
+                    audioCaptureEngine = component "AudioCaptureEngine" "Writes WAV chunks from capture events, rotates chunks, queues each for conversion, raises peak levels" "Service" "Core"
+                    microphoneCapture = component "MicrophoneCapture" "Captures audio from microphone" "IAudioCapture Implementation" "Audio"
+                    loopbackCapture = component "LoopbackCapture" "Captures system audio via loopback" "IAudioCapture Implementation" "Audio"
+                }
+
+                group "Compression" {
+                    ffmpegService = component "FFmpegService" "Background queue converting chunks to m4a; merges m4a chunks on stop" "Service" "Integration"
+                }
+
+                group "Persistence & recovery" {
+                    fileManager = component "FileManager" "File I/O: session folders, chunk paths, listing and merging WAVs" "Service" "Core"
+                    stateManager = component "StateManager" "Persists and recovers recording session state" "Service" "Core"
+                    recoveryManager = component "RecoveryManager" "Finds and loads incomplete sessions" "Service" "Core"
+                }
+
+                group "Configuration & logging" {
+                    configManager = component "ConfigurationManager" "Loads, validates, watches and saves configuration" "Service" "Core"
+                    logManager = component "LogManager" "Session logging" "Service" "Core"
+                }
+
+                group "Models" {
+                    recordingSession = component "RecordingSession" "Session state and metadata" "Data Model" "Model"
+                    audioConfig = component "AudioConfig" "Audio configuration settings" "Data Model" "Model"
+                }
 
                 # Contract realisation
                 recordingOrchestrator -> irecorder "Implements" "C# interface"
@@ -157,11 +176,25 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             description "WPF UI over a reusable recording core, with file-system and config storage."
         }
 
-        # Level 3 - components
+        # Level 3 - components (grouped overview + focused slices to keep each diagram readable)
         component core "Components-Core" {
             include *
-            autoLayout tb
-            description "Recording engine, capture modes, persistence and configuration behind IRecorder."
+            autoLayout lr
+            description "Recording core, grouped by responsibility (contracts, capture, compression, persistence, config, models)."
+        }
+
+        # Focused slice: the capture + conversion pipeline
+        component core "Components-Capture" {
+            include audioCaptureEngine iaudiocapture microphoneCapture loopbackCapture ffmpegService recordingOrchestrator windowsOS ffmpeg fileSystem
+            autoLayout lr
+            description "Capture pipeline: engine, IAudioCapture implementations, conversion and where audio is written."
+        }
+
+        # Focused slice: session lifecycle, persistence and recovery
+        component core "Components-Session" {
+            include recordingOrchestrator irecorder stateManager fileManager recoveryManager configManager logManager recordingSession audioConfig fileSystem configStorage
+            autoLayout lr
+            description "Session coordination, persistence, recovery, configuration and logging."
         }
 
         component app "Components-App" {
