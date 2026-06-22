@@ -2,11 +2,18 @@
 
 Current design of the recording pipeline. This reflects the event-driven implementation and supersedes the older auto-save description in `INDEX.md`.
 
+## Projects
+
+Two projects under `src/`:
+
+- **InterviewRecorder.Core** — Models + Services + the `IRecorder` interface. No WPF dependency, so any UI can reuse it.
+- **InterviewRecorder.App** — the WPF UI. References Core and depends on `IRecorder`, never the concrete `RecordingOrchestrator`.
+
 ## Layers
 
-```
-MainWindow (UI)
-  -> RecordingOrchestrator (coordinates a session)
+```text
+MainWindow (UI, InterviewRecorder.App)
+  -> IRecorder  (interface; implemented by RecordingOrchestrator in Core)
        -> AudioCaptureEngine (owns the WAV file, chunks, rotation)
             -> IAudioCapture (MicrophoneCapture | LoopbackCapture)
        -> FFmpegService (background m4a conversion queue)

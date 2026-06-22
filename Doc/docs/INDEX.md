@@ -18,6 +18,14 @@ docker run -it --rm -p 8080:8080 -v "%cd%/Doc":/usr/local/structurizr structuriz
 
 Or upload `workspace.dsl` to <https://structurizr.com>, or use the Structurizr DSL extension in VS Code.
 
+For a no-tooling view, open the prebuilt offline viewer at [`../static/index.html`](../static/index.html). Mermaid exports also live in [`../diagrams/`](../diagrams/). Both are generated from `workspace.dsl`:
+
+```bash
+# from the repo root
+wsl bash -c 'docker run --rm -v "$(pwd)/Doc:/usr/local/structurizr" structurizr/structurizr export -workspace workspace.dsl -format static -output static'
+wsl bash -c 'docker run --rm -v "$(pwd)/Doc:/usr/local/structurizr" structurizr/structurizr export -workspace workspace.dsl -format mermaid -output diagrams'
+```
+
 ## Component summary
 
 | Component | Type | Purpose |

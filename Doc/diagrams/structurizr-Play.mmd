@@ -11,22 +11,16 @@ graph LR
       style 44 fill:#85bbf0,stroke:#5d82a8,color:#000000
       5["<div style='font-weight: bold'>Desktop UI</div><div style='font-size: 70%; margin-top: 0px'>[Container: C# .NET 9, WPF]</div><div style='font-size: 80%; margin-top:10px'>WPF front-end: menu,<br />controls, live waveform,<br />chunks grid, in-app playback</div>"]
       style 5 fill:#438dd5,stroke:#2e6295,color:#ffffff
-      7("<div style='font-weight: bold'>Recording Core</div><div style='font-size: 70%; margin-top: 0px'>[Container: C# .NET 9 class library]</div><div style='font-size: 80%; margin-top:10px'>Reusable recording engine,<br />capture modes, persistence<br />and configuration</div>")
-      style 7 fill:#2f6f4f,stroke:#204d37,color:#ffffff
     end
 
     1["<div style='font-weight: bold'>User</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>A person conducting or<br />recording an interview</div>"]
     style 1 fill:#08427b,stroke:#052e56,color:#ffffff
     2("<div style='font-weight: bold'>Windows Operating System</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Provides audio device access<br />and file system</div>")
     style 2 fill:#999999,stroke:#6b6b6b,color:#ffffff
-    3("<div style='font-weight: bold'>FFmpeg</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>External audio processing<br />tool for compression and<br />format conversion</div>")
-    style 3 fill:#999999,stroke:#6b6b6b,color:#ffffff
 
-    1-. "<div>1. 1. Click Stop</div><div style='font-size: 70%'>[Mouse / keyboard]</div>" .->5
-    5-. "<div>2. 2. StopRecordingAsync()</div><div style='font-size: 70%'>[Method calls]</div>" .->7
-    7-. "<div>3. 3. Stop audio capture</div><div style='font-size: 70%'>[NAudio (WaveIn / WASAPI)]</div>" .->2
-    7-. "<div>4. 4. Drain conversions</div><div style='font-size: 70%'>[Process execution]</div>" .->3
-    7-. "<div>5. 5. Merge WAV + write final<br />m4a</div><div style='font-size: 70%'>[File I/O]</div>" .->44
-    5-. "<div>6. 6. Show completion</div><div style='font-size: 70%'>[UI]</div>" .->1
+    1-. "<div>1. 1. Click Play</div><div style='font-size: 70%'>[Mouse / keyboard]</div>" .->5
+    5-. "<div>2. 2. Read the merged WAV</div><div style='font-size: 70%'>[File read]</div>" .->44
+    5-. "<div>3. 3. Play audio and meter<br />the waveform</div><div style='font-size: 70%'>[NAudio WaveOutEvent]</div>" .->2
+    5-. "<div>4. 4. Show playback / live<br />waveform</div><div style='font-size: 70%'>[UI]</div>" .->1
 
   end

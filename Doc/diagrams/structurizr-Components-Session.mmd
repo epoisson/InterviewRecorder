@@ -1,0 +1,77 @@
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Component View: Interview Recorder - Recording Core"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    subgraph 4 ["Interview Recorder"]
+      style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
+
+      subgraph 7 ["Recording Core"]
+        style 7 fill:#ffffff,stroke:#204d37,color:#204d37
+
+        subgraph group1 ["Configuration & logging"]
+          style group1 fill:#ffffff,stroke:#cccccc,color:#cccccc,stroke-dasharray:5
+
+          18["<div style='font-weight: bold'>ConfigurationManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Loads, validates, watches and<br />saves configuration</div>"]
+          style 18 fill:#4ecdc4,stroke:#368f89,color:#000000
+          19["<div style='font-weight: bold'>LogManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Session logging</div>"]
+          style 19 fill:#4ecdc4,stroke:#368f89,color:#000000
+        end
+
+        subgraph group2 ["Contracts"]
+          style group2 fill:#ffffff,stroke:#cccccc,color:#cccccc,stroke-dasharray:5
+
+          9["<div style='font-weight: bold'>IRecorder</div><div style='font-size: 70%; margin-top: 0px'>[Component: C# interface]</div><div style='font-size: 80%; margin-top:10px'>Recording surface the UI<br />binds to:<br />start/pause/resume/stop,<br />recovery, status and events</div>"]
+          style 9 fill:#bdb2ff,stroke:#847cb2,color:#000000
+        end
+
+        subgraph group3 ["Models"]
+          style group3 fill:#ffffff,stroke:#cccccc,color:#cccccc,stroke-dasharray:5
+
+          20["<div style='font-weight: bold'>RecordingSession</div><div style='font-size: 70%; margin-top: 0px'>[Component: Data Model]</div><div style='font-size: 80%; margin-top:10px'>Session state and metadata</div>"]
+          style 20 fill:#f38181,stroke:#aa5a5a,color:#000000
+          21["<div style='font-weight: bold'>AudioConfig</div><div style='font-size: 70%; margin-top: 0px'>[Component: Data Model]</div><div style='font-size: 80%; margin-top:10px'>Audio configuration settings</div>"]
+          style 21 fill:#f38181,stroke:#aa5a5a,color:#000000
+        end
+
+        subgraph group4 ["Persistence & recovery"]
+          style group4 fill:#ffffff,stroke:#cccccc,color:#cccccc,stroke-dasharray:5
+
+          15["<div style='font-weight: bold'>FileManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>File I/O: session folders,<br />chunk paths, listing and<br />merging WAVs</div>"]
+          style 15 fill:#4ecdc4,stroke:#368f89,color:#000000
+          16["<div style='font-weight: bold'>StateManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Persists and recovers<br />recording session state</div>"]
+          style 16 fill:#4ecdc4,stroke:#368f89,color:#000000
+          17["<div style='font-weight: bold'>RecoveryManager</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Finds and loads incomplete<br />sessions</div>"]
+          style 17 fill:#4ecdc4,stroke:#368f89,color:#000000
+        end
+
+        8["<div style='font-weight: bold'>RecordingOrchestrator</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Coordinates a session and<br />raises UI events; implements<br />IRecorder</div>"]
+        style 8 fill:#ff6b6b,stroke:#b24a4a,color:#ffffff
+      end
+
+      44[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json and<br />session.log under<br />Documents\InterviewRecordings</div>")]
+      style 44 fill:#85bbf0,stroke:#5d82a8,color:#000000
+      45["<div style='font-weight: bold'>Configuration Storage</div><div style='font-size: 70%; margin-top: 0px'>[Container: JSON File]</div><div style='font-size: 80%; margin-top:10px'>appsettings.json (capture,<br />chunking, compression<br />settings)</div>"]
+      style 45 fill:#ffa500,stroke:#b27300,color:#000000
+    end
+
+    8-. "<div>Implements</div><div style='font-size: 70%'>[C# interface]</div>" .->9
+    8-. "<div>Persists session state</div><div style='font-size: 70%'>[Async methods]</div>" .->16
+    8-. "<div>Creates dirs, lists chunks,<br />merges WAVs</div><div style='font-size: 70%'>[Methods]</div>" .->15
+    8-. "<div>Finds incomplete sessions</div><div style='font-size: 70%'>[Async methods]</div>" .->17
+    8-. "<div>Logs events</div><div style='font-size: 70%'>[Async methods]</div>" .->19
+    8-. "<div>Reads configuration</div><div style='font-size: 70%'>[Properties]</div>" .->18
+    15-. "<div>Reads chunk list</div><div style='font-size: 70%'>[Property access]</div>" .->20
+    16-. "<div>Gets metadata path</div><div style='font-size: 70%'>[Method calls]</div>" .->15
+    16-. "<div>Serializes/Deserializes</div><div style='font-size: 70%'>[JSON]</div>" .->20
+    17-. "<div>Scans directories</div><div style='font-size: 70%'>[Method calls]</div>" .->15
+    17-. "<div>Loads session state</div><div style='font-size: 70%'>[Method calls]</div>" .->16
+    17-. "<div>Returns incomplete session</div><div style='font-size: 70%'>[Return value]</div>" .->8
+    18-. "<div>Deserializes to</div><div style='font-size: 70%'>[JSON]</div>" .->21
+    15-. "<div>Reads and writes files</div><div style='font-size: 70%'>[File I/O]</div>" .->44
+    16-. "<div>Writes metadata.json</div><div style='font-size: 70%'>[File I/O]</div>" .->44
+    19-. "<div>Writes session.log</div><div style='font-size: 70%'>[File I/O]</div>" .->44
+    18-. "<div>Reads, saves and watches<br />settings</div><div style='font-size: 70%'>[File I/O + FileSystemWatcher]</div>" .->45
+
+  end

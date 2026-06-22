@@ -31,11 +31,23 @@ Windows desktop app for recording interviews to disk as chunked WAV, compressing
 - .NET 9 SDK.
 - FFmpeg on `PATH` (or set an explicit path in config). Compression is skipped with a warning if FFmpeg is not found.
 
+## Project structure
+
+```text
+InterviewRecorder.sln
+src/
+  InterviewRecorder.Core/   class library — Models + Services + IRecorder (no WPF; reusable by any UI)
+  InterviewRecorder.App/    WPF UI (references Core, binds to IRecorder)
+Doc/                        architecture docs + Structurizr model
+```
+
+The UI depends on the `IRecorder` interface, not the concrete orchestrator, so the recording engine and capture modes can be driven by a different front-end (console, web) without changes to Core.
+
 ## Build and run
 
 ```bash
 dotnet build
-dotnet run
+dotnet run --project src/InterviewRecorder.App
 ```
 
 ## Download

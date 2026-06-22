@@ -1,126 +1,138 @@
 workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Application" {
 
+    # Relationships are declared explicitly at each level (component + container), so don't
+    # auto-create implied ones (which would collide with the explicit container relationships).
+    !impliedRelationships false
+
     model {
         # People
         user = person "User" "A person conducting or recording an interview" "User"
-        
+
         # External Systems
         windowsOS = softwareSystem "Windows Operating System" "Provides audio device access and file system" "External System"
         ffmpeg = softwareSystem "FFmpeg" "External audio processing tool for compression and format conversion" "External System"
-        
+
         # Main System
         interviewRecorder = softwareSystem "Interview Recorder" "Desktop application for recording and managing interview audio with crash recovery" {
 
             !docs docs
             !adrs adrs
 
-            # Containers
-            wpfApp = container "WPF Application" "Desktop UI application" "C# .NET 9, WPF" "Desktop Application" {
+            # ---- Container: WPF UI ----
+            app = container "Desktop UI" "WPF front-end: menu, controls, live waveform, chunks grid, in-app playback" "C# .NET 9, WPF" "Desktop Application" {
+                mainWindow = component "MainWindow" "Main UI window; binds to IRecorder and marshals events to the dispatcher" "WPF Window" "UI"
+            }
 
-                # UI Components
-                mainWindow = component "MainWindow" "Main UI window: menu (View/Device/Config), controls, live waveform, chunks grid, in-app playback" "WPF Window" "UI"
-                
-                # Orchestration Layer
-                recordingOrchestrator = component "RecordingOrchestrator" "Coordinates all recording operations and manages application state" "Service" "Orchestrator"
-                
-                # Core Services
-                audioCaptureEngine = component "AudioCaptureEngine" "Writes WAV chunks from capture events, rotates chunks, queues each for conversion, raises peak levels" "Service" "Core"
-                stateManager = component "StateManager" "Persists and recovers recording session state" "Service" "Core"
-                fileManager = component "FileManager" "Manages file I/O operations and audio merging" "Service" "Core"
-                recoveryManager = component "RecoveryManager" "Handles crash recovery and incomplete sessions" "Service" "Core"
-                logManager = component "LogManager" "Manages application logging" "Service" "Core"
-                configManager = component "ConfigurationManager" "Loads and manages application configuration" "Service" "Core"
-                ffmpegService = component "FFmpegService" "Background queue converting chunks to m4a; merges m4a chunks on stop" "Service" "Integration"
-                
-                # Audio Capture Implementations
-                microphoneCapture = component "MicrophoneCapture" "Captures audio from microphone" "IAudioCapture Implementation" "Audio"
-                loopbackCapture = component "LoopbackCapture" "Captures system audio via loopback" "IAudioCapture Implementation" "Audio"
-                
-                # Data Models
-                recordingSession = component "RecordingSession" "Session state and metadata" "Data Model" "Model"
-                audioConfig = component "AudioConfig" "Audio configuration settings" "Data Model" "Model"
-                
-                # Relationships - UI to Orchestrator
-                mainWindow -> recordingOrchestrator "Uses" "Method calls, Events"
-                
-                # Relationships - Orchestrator to Services
+            # ---- Container: reusable recording core (no UI dependency) ----
+            core = container "Recording Core" "Reusable recording engine, capture modes, persistence and configuration" "C# .NET 9 class library" "Library" {
+                # Central coordinator
+                recordingOrchestrator = component "RecordingOrchestrator" "Coordinates a session and raises UI events; implements IRecorder" "Service" "Orchestrator"
+
+                group "Contracts" {
+                    irecorder = component "IRecorder" "Recording surface the UI binds to: start/pause/resume/stop, recovery, status and events" "C# interface" "Contract"
+                    iaudiocapture = component "IAudioCapture" "Capture-source abstraction: raises DataAvailable and exposes the capture format" "C# interface" "Contract"
+                }
+
+                group "Capture" {
+                    audioCaptureEngine = component "AudioCaptureEngine" "Writes WAV chunks from capture events, rotates chunks, queues each for conversion, raises peak levels" "Service" "Core"
+                    microphoneCapture = component "MicrophoneCapture" "Captures audio from microphone" "IAudioCapture Implementation" "Audio"
+                    loopbackCapture = component "LoopbackCapture" "Captures system audio via loopback" "IAudioCapture Implementation" "Audio"
+                }
+
+                group "Compression" {
+                    ffmpegService = component "FFmpegService" "Background queue converting chunks to m4a; merges m4a chunks on stop" "Service" "Integration"
+                }
+
+                group "Persistence & recovery" {
+                    fileManager = component "FileManager" "File I/O: session folders, chunk paths, listing and merging WAVs" "Service" "Core"
+                    stateManager = component "StateManager" "Persists and recovers recording session state" "Service" "Core"
+                    recoveryManager = component "RecoveryManager" "Finds and loads incomplete sessions" "Service" "Core"
+                }
+
+                group "Configuration & logging" {
+                    configManager = component "ConfigurationManager" "Loads, validates, watches and saves configuration" "Service" "Core"
+                    logManager = component "LogManager" "Session logging" "Service" "Core"
+                }
+
+                group "Models" {
+                    recordingSession = component "RecordingSession" "Session state and metadata" "Data Model" "Model"
+                    audioConfig = component "AudioConfig" "Audio configuration settings" "Data Model" "Model"
+                }
+
+                # Contract realisation
+                recordingOrchestrator -> irecorder "Implements" "C# interface"
+
+                # Orchestrator -> services
                 recordingOrchestrator -> audioCaptureEngine "Controls recording lifecycle" "Async methods"
                 recordingOrchestrator -> stateManager "Persists session state" "Async methods"
-                recordingOrchestrator -> fileManager "Creates directories, lists existing chunks, merges WAVs" "Sync/Async methods"
-                recordingOrchestrator -> recoveryManager "Checks for incomplete sessions" "Async methods"
+                recordingOrchestrator -> fileManager "Creates dirs, lists chunks, merges WAVs" "Methods"
+                recordingOrchestrator -> recoveryManager "Finds incomplete sessions" "Async methods"
                 recordingOrchestrator -> logManager "Logs events" "Async methods"
-                recordingOrchestrator -> configManager "Reads configuration" "Sync properties"
-                recordingOrchestrator -> ffmpegService "Manages compression" "Async methods"
-                
-                # Relationships - AudioCaptureEngine
-                audioCaptureEngine -> microphoneCapture "Creates and controls" "Factory pattern"
-                audioCaptureEngine -> loopbackCapture "Creates and controls" "Factory pattern"
-                audioCaptureEngine -> fileManager "Gets chunk paths, merges WAV chunks" "Direct calls"
-                audioCaptureEngine -> ffmpegService "Queues each closed chunk for conversion" "Async calls"
-                audioCaptureEngine -> recordingOrchestrator "Raises peak levels for the waveform" "AudioPeak event"
-                
-                # Relationships - FileManager
-                fileManager -> recordingSession "Reads chunk list" "Property access"
-                
-                # Relationships - FFmpegService to FFmpeg
-                ffmpegService -> ffmpeg "Converts chunks and concatenates m4a" "Process.Start"
+                recordingOrchestrator -> configManager "Reads configuration" "Properties"
+                recordingOrchestrator -> ffmpegService "Manages and drains conversion" "Async methods"
 
-                # Playback
-                mainWindow -> windowsOS "Plays back the recording" "NAudio WaveOutEvent"
-                
-                # Relationships - StateManager
+                # Capture engine
+                audioCaptureEngine -> iaudiocapture "Creates and controls (per capture mode)" "Factory"
+                microphoneCapture -> iaudiocapture "Implements" "C# interface"
+                loopbackCapture -> iaudiocapture "Implements" "C# interface"
+                iaudiocapture -> audioCaptureEngine "Raises DataAvailable / RecordingStopped" "Events"
+                audioCaptureEngine -> fileManager "Gets chunk paths" "Direct calls"
+                audioCaptureEngine -> ffmpegService "Queues each closed chunk" "Async calls"
+                audioCaptureEngine -> recordingOrchestrator "Raises peak/chunk events" "Events"
+
+                # Persistence / recovery / config
+                fileManager -> recordingSession "Reads chunk list" "Property access"
                 stateManager -> fileManager "Gets metadata path" "Method calls"
                 stateManager -> recordingSession "Serializes/Deserializes" "JSON"
-                
-                # Relationships - RecoveryManager
                 recoveryManager -> fileManager "Scans directories" "Method calls"
                 recoveryManager -> stateManager "Loads session state" "Method calls"
-                
-                # Relationships - ConfigManager
-                configManager -> audioConfig "Deserializes to" "JSON"
-                
-                # NAudio Library Usage
-                microphoneCapture -> windowsOS "Captures from device" "NAudio WaveInEvent"
-                loopbackCapture -> windowsOS "Captures loopback" "NAudio WasapiLoopbackCapture"
-
-                # Audio delivery (used by the AudioDataFlow dynamic view)
-                windowsOS -> microphoneCapture "Delivers captured audio" "NAudio callback"
-                
-                # Additional relationships for dynamic diagrams
-                audioCaptureEngine -> windowsOS "Stops audio capture" "NAudio API"
-                microphoneCapture -> audioCaptureEngine "Forwards audio (DataAvailable)" "Event"
-                recordingOrchestrator -> mainWindow "Raises state, log and level events" "Events"
                 recoveryManager -> recordingOrchestrator "Returns incomplete session" "Return value"
+                configManager -> audioConfig "Deserializes to" "JSON"
             }
-            
-            # File System Storage (per-session folder: chunks/, metadata.json, session.log, merged WAV + m4a)
-            fileSystem = container "File System" "Stores chunk + merged WAV/m4a files, metadata.json, and session.log under Documents\InterviewRecordings" "Windows File System" "Storage"
 
-            # External Configuration
+            # ---- Storage containers ----
+            fileSystem = container "File System" "Stores chunk + merged WAV/m4a files, metadata.json and session.log under Documents\InterviewRecordings" "Windows File System" "Storage"
             configStorage = container "Configuration Storage" "appsettings.json (capture, chunking, compression settings)" "JSON File" "Configuration"
-            
-            # Container Relationships
-            wpfApp -> fileSystem "Reads/Writes" "File I/O"
-            wpfApp -> configStorage "Reads configuration" "File I/O"
-            wpfApp -> windowsOS "Accesses audio devices" "NAudio Library"
-            wpfApp -> ffmpeg "Invokes for compression" "Process execution"
-            
-            # Additional relationships needed for dynamic diagrams
-            fileManager -> fileSystem "Reads and writes files" "File I/O"
-            ffmpeg -> fileSystem "Writes compressed files" "File I/O"
+
+            # ---- Component-level cross-container / external relationships ----
+            mainWindow -> irecorder "Drives recording (start/pause/resume/stop, recover)" "Method calls"
+            recordingOrchestrator -> mainWindow "Raises state, log, level, chunk and conversion events" "Events"
+            mainWindow -> windowsOS "Plays back the recording" "NAudio WaveOutEvent"
+            mainWindow -> fileSystem "Reads the merged file for playback" "File read"
+
+            microphoneCapture -> windowsOS "Captures from device" "NAudio WaveInEvent"
+            loopbackCapture -> windowsOS "Captures loopback" "NAudio WasapiLoopbackCapture"
+            windowsOS -> iaudiocapture "Delivers captured audio" "NAudio callback"
+            audioCaptureEngine -> windowsOS "Stops audio capture" "NAudio API"
+            ffmpegService -> ffmpeg "Converts chunks and concatenates m4a" "Process.Start"
+
             audioCaptureEngine -> fileSystem "Writes chunk audio" "WaveFileWriter"
+            fileManager -> fileSystem "Reads and writes files" "File I/O"
+            stateManager -> fileSystem "Writes metadata.json" "File I/O"
+            logManager -> fileSystem "Writes session.log" "File I/O"
             ffmpegService -> fileSystem "Writes converted and merged files" "File I/O"
+            ffmpeg -> fileSystem "Writes compressed files" "File I/O"
+            configManager -> configStorage "Reads, saves and watches settings" "File I/O + FileSystemWatcher"
+
+            # ---- Container-level relationships (for the Container and dynamic views) ----
+            user -> app "Records / plays back interviews" "Mouse / keyboard"
+            app -> user "Displays status, waveform and chunks" "UI"
+            app -> core "Drives recording via IRecorder" "Method calls"
+            core -> app "Raises state / level / chunk events" "Events"
+            app -> windowsOS "Plays back recordings" "NAudio WaveOutEvent"
+            app -> fileSystem "Reads merged recording for playback" "File read"
+            core -> windowsOS "Captures and stops audio" "NAudio (WaveIn / WASAPI)"
+            windowsOS -> core "Delivers captured audio" "NAudio callbacks"
+            core -> ffmpeg "Converts and merges audio" "Process execution"
+            core -> fileSystem "Reads and writes recordings" "File I/O"
+            core -> configStorage "Reads, saves and watches settings" "File I/O"
         }
-        
-        # System Context Relationships
+
+        # System Context
         user -> interviewRecorder "Records interviews using" "WPF UI"
         interviewRecorder -> windowsOS "Uses audio devices from" "NAudio API"
         interviewRecorder -> ffmpeg "Compresses audio using" "Command-line execution"
-        
-        # Additional user interactions for dynamic diagrams
-        user -> mainWindow "Interacts with" "Mouse/Keyboard"
-        mainWindow -> user "Displays information to" "UI Updates"
-        
+
         # Deployment
         deploymentEnvironment "Production" {
             deploymentNode "User's Computer" "The end user's Windows PC" "Windows 10/11" {
@@ -143,150 +155,126 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
     }
 
     views {
-        # System Landscape (Level 0)
+        # Level 0 - landscape
         systemLandscape "Landscape" {
             include *
             autoLayout lr
             description "The recorder, its user, and external dependencies (Windows, FFmpeg)."
         }
 
-        # System Context View (Level 1)
+        # Level 1 - context
         systemContext interviewRecorder "SystemContext" {
             include *
             autoLayout lr
-            description "System context diagram for Interview Recorder showing external dependencies"
+            description "System context: external dependencies of the Interview Recorder."
         }
-        
-        # Container View (Level 2)
+
+        # Level 2 - containers
         container interviewRecorder "Containers" {
             include *
             autoLayout lr
-            description "Container diagram showing the high-level technical building blocks"
+            description "WPF UI over a reusable recording core, with file-system and config storage."
         }
-        
-        # Component View - WPF Application (Level 3)
-        component wpfApp "Components-Overview" {
+
+        # Level 3 - components (grouped overview + focused slices to keep each diagram readable)
+        component core "Components-Core" {
             include *
-            autoLayout tb
-            description "Component diagram showing all components within the WPF application"
-        }
-        
-        # Component View - Core Services
-        component wpfApp "Components-CoreServices" {
-            include mainWindow
-            include recordingOrchestrator
-            include audioCaptureEngine
-            include stateManager
-            include fileManager
-            include recoveryManager
-            include logManager
-            include configManager
-            include ffmpegService
-            include recordingSession
-            include audioConfig
             autoLayout lr
-            description "Core service components and their relationships"
+            description "Recording core, grouped by responsibility (contracts, capture, compression, persistence, config, models)."
         }
-        
-        # Component View - Audio Capture
-        component wpfApp "Components-AudioCapture" {
-            include audioCaptureEngine
-            include microphoneCapture
-            include loopbackCapture
-            include fileManager
-            include ffmpegService
-            include windowsOS
-            autoLayout tb
-            description "Audio capture subsystem showing capture implementations"
-        }
-        
-        # Component View - State Management
-        component wpfApp "Components-StateManagement" {
-            include recordingOrchestrator
-            include stateManager
-            include recoveryManager
-            include fileManager
-            include recordingSession
+
+        # Focused slice: the capture + conversion pipeline
+        component core "Components-Capture" {
+            include audioCaptureEngine iaudiocapture microphoneCapture loopbackCapture ffmpegService recordingOrchestrator windowsOS ffmpeg fileSystem
             autoLayout lr
-            description "State management and crash recovery subsystem"
+            description "Capture pipeline: engine, IAudioCapture implementations, conversion and where audio is written."
         }
-        
-        # Dynamic View - Start Recording
-        dynamic wpfApp "StartRecording" "Start Recording Flow" {
-            user -> mainWindow "1. Clicks Start Recording"
-            mainWindow -> recordingOrchestrator "2. StartRecordingAsync()"
-            recordingOrchestrator -> fileManager "3. CreateSessionDirectory()"
-            recordingOrchestrator -> configManager "4. Get CurrentAudioConfig"
-            recordingOrchestrator -> stateManager "5. SaveStateAsync()"
-            recordingOrchestrator -> audioCaptureEngine "6. StartRecording()"
-            audioCaptureEngine -> microphoneCapture "7. Create IAudioCapture"
-            microphoneCapture -> windowsOS "8. Start capturing audio"
-            audioCaptureEngine -> fileManager "9. Create first chunk file"
-            recordingOrchestrator -> mainWindow "10. Raise StateChanged event"
-            mainWindow -> user "11. Update UI (show recording)"
+
+        # Focused slice: session lifecycle, persistence and recovery
+        component core "Components-Session" {
+            include recordingOrchestrator irecorder stateManager fileManager recoveryManager configManager logManager recordingSession audioConfig fileSystem configStorage
             autoLayout lr
-            description "Sequence of operations when user starts recording"
+            description "Session coordination, persistence, recovery, configuration and logging."
         }
-        
-        # Dynamic View - Audio Data Flow
-        dynamic wpfApp "AudioDataFlow" "Audio Data Processing Flow" {
-            windowsOS -> microphoneCapture "1. Audio data available (real time)"
-            microphoneCapture -> audioCaptureEngine "2. DataAvailable event"
-            audioCaptureEngine -> fileSystem "3. Write bytes to current chunk"
-            audioCaptureEngine -> recordingOrchestrator "4. Raise peak level (waveform)"
-            audioCaptureEngine -> ffmpegService "5. On rotation: queue closed chunk"
-            ffmpegService -> ffmpeg "6. Convert chunk to m4a"
-            ffmpeg -> fileSystem "7. Write m4a chunk"
+
+        component app "Components-App" {
+            include *
             autoLayout lr
-            description "Continuous flow of audio data during recording"
+            description "The WPF UI and its dependency on the IRecorder contract."
         }
-        
-        # Dynamic View - Stop Recording
-        dynamic wpfApp "StopRecording" "Stop Recording and Finalization" {
-            user -> mainWindow "1. Clicks Stop Recording"
-            mainWindow -> recordingOrchestrator "2. StopRecordingAsync()"
-            recordingOrchestrator -> audioCaptureEngine "3. StopRecording() (final chunk queued)"
-            audioCaptureEngine -> windowsOS "4. Stop audio capture"
-            recordingOrchestrator -> ffmpegService "5. Stop() - drain conversion queue"
-            ffmpegService -> ffmpeg "6. Convert remaining chunks"
-            recordingOrchestrator -> fileManager "7. MergeChunksAsync() - merge WAV chunks"
-            fileManager -> fileSystem "8. Write final WAV"
-            recordingOrchestrator -> ffmpegService "9. MergeToM4a() - concat m4a chunks"
-            ffmpegService -> fileSystem "10. Write final m4a"
-            recordingOrchestrator -> stateManager "11. Mark session complete"
-            recordingOrchestrator -> mainWindow "12. Return final file path"
-            mainWindow -> user "13. Show completion dialog"
+
+        # Dynamic views (container level, since flows span the UI and the core)
+        dynamic interviewRecorder "StartRecording" "Start Recording" {
+            user -> app "1. Click Start Recording"
+            app -> core "2. StartRecordingAsync()"
+            core -> windowsOS "3. Start capturing audio"
+            core -> fileSystem "4. Create first chunk"
+            app -> user "5. Show recording state"
             autoLayout lr
-            description "Sequence of operations when stopping and finalizing recording"
         }
-        
-        # Dynamic View - Crash Recovery
-        dynamic wpfApp "CrashRecovery" "Crash Recovery Process" {
-            mainWindow -> recordingOrchestrator "1. CheckForIncompleteSessionAsync()"
-            recordingOrchestrator -> recoveryManager "2. FindIncompleteSessionAsync()"
-            recoveryManager -> fileManager "3. Scan session directories"
-            recoveryManager -> stateManager "4. Load session metadata"
-            recoveryManager -> recordingOrchestrator "5. Return incomplete session"
-            recordingOrchestrator -> mainWindow "6. Return session details"
-            mainWindow -> user "7. Show recovery prompt"
-            user -> mainWindow "8. User confirms recovery"
-            mainWindow -> recordingOrchestrator "9. RecoverSessionAsync()"
-            recordingOrchestrator -> fileManager "10. List existing chunks on disk"
-            recordingOrchestrator -> audioCaptureEngine "11. InitializeForRecovery() (next chunk index)"
-            recordingOrchestrator -> ffmpegService "12. Re-queue chunks without an m4a"
-            recordingOrchestrator -> mainWindow "13. Raise StateChanged (Paused)"
-            mainWindow -> user "14. Show recovered session (paused)"
+
+        dynamic interviewRecorder "Pause" "Pause Recording" {
+            user -> app "1. Click Pause"
+            app -> core "2. PauseRecordingAsync()"
+            core -> windowsOS "3. Stop capture; close current chunk"
+            core -> ffmpeg "4. Queue closed chunk for conversion"
+            app -> user "5. Show paused"
             autoLayout lr
-            description "Detect a crashed session, reopen it paused, and re-queue unconverted chunks. Resume continues at the next chunk; stop merges the existing chunks."
         }
-        
-        # Deployment View
+
+        dynamic interviewRecorder "Resume" "Resume Recording" {
+            user -> app "1. Click Resume"
+            app -> core "2. ResumeRecordingAsync()"
+            core -> fileSystem "3. Open the next chunk"
+            core -> windowsOS "4. Restart capture"
+            app -> user "5. Show recording state"
+            autoLayout lr
+        }
+
+        dynamic interviewRecorder "AudioDataFlow" "Audio Data Flow" {
+            windowsOS -> core "1. Audio data available (real time)"
+            core -> fileSystem "2. Write bytes to current chunk"
+            core -> app "3. Raise peak level (waveform)"
+            core -> ffmpeg "4. On rotation: convert closed chunk"
+            ffmpeg -> fileSystem "5. Write m4a chunk"
+            autoLayout lr
+        }
+
+        dynamic interviewRecorder "StopRecording" "Stop and Finalize" {
+            user -> app "1. Click Stop"
+            app -> core "2. StopRecordingAsync()"
+            core -> windowsOS "3. Stop audio capture"
+            core -> ffmpeg "4. Drain conversions"
+            core -> fileSystem "5. Merge WAV + write final m4a"
+            app -> user "6. Show completion"
+            autoLayout lr
+        }
+
+        dynamic interviewRecorder "Play" "Play Recording" {
+            user -> app "1. Click Play"
+            app -> fileSystem "2. Read the merged WAV"
+            app -> windowsOS "3. Play audio and meter the waveform"
+            app -> user "4. Show playback / live waveform"
+            autoLayout lr
+        }
+
+        dynamic interviewRecorder "CrashRecovery" "Crash Recovery" {
+            app -> core "1. CheckForIncompleteSession / RecoverSession"
+            core -> fileSystem "2. Scan dirs + list existing chunks"
+            core -> ffmpeg "3. Re-queue chunks without an m4a"
+            core -> app "4. Raise StateChanged (paused)"
+            app -> user "5. Show recovered session (paused)"
+            autoLayout lr
+            description "Reopen a crashed session paused; resume continues at the next chunk, stop merges existing chunks."
+        }
+
+        # Deployment
         deployment interviewRecorder "Production" "Deployment" {
             include *
             autoLayout lr
             description "Production deployment architecture"
         }
-        
+
         # Styling
         styles {
             element "Software System" {
@@ -307,6 +295,11 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             element "Desktop Application" {
                 shape Window
             }
+            element "Library" {
+                background #2f6f4f
+                color #ffffff
+                shape RoundedBox
+            }
             element "Storage" {
                 background #85bbf0
                 color #000000
@@ -319,6 +312,11 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             }
             element "Component" {
                 background #85bbf0
+                color #000000
+                shape Component
+            }
+            element "Contract" {
+                background #bdb2ff
                 color #000000
                 shape Component
             }
@@ -368,12 +366,7 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
                 shape Box
             }
         }
-        
-        # Themes
-        #theme default
+
+        theme default
     }
-    
-    # Documentation
-    #!docs docs
-    #!adrs adrs
 }

@@ -26,7 +26,7 @@ jobs:
         shell: pwsh
         run: |
           foreach ($rid in 'win-x64','win-arm64','win-x86') {
-            dotnet publish InterviewRecorder.csproj -c Release -r $rid --self-contained -o "publish/$rid"
+            dotnet publish src/InterviewRecorder.App/InterviewRecorder.App.csproj -c Release -r $rid --self-contained -o "publish/$rid"
             if ($LASTEXITCODE -ne 0) { throw "publish failed for $rid" }
             Compress-Archive -Path "publish/$rid/*" -DestinationPath "InterviewRecorder-$rid.zip" -Force
           }

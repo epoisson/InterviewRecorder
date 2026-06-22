@@ -1,0 +1,27 @@
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Component View: Interview Recorder - Desktop UI"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    2("<div style='font-weight: bold'>Windows Operating System</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Provides audio device access<br />and file system</div>")
+    style 2 fill:#999999,stroke:#6b6b6b,color:#ffffff
+
+    subgraph 4 ["Interview Recorder"]
+      style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
+
+      subgraph 5 ["Desktop UI"]
+        style 5 fill:#ffffff,stroke:#2e6295,color:#2e6295
+
+        6["<div style='font-weight: bold'>MainWindow</div><div style='font-size: 70%; margin-top: 0px'>[Component: WPF Window]</div><div style='font-size: 80%; margin-top:10px'>Main UI window; binds to<br />IRecorder and marshals events<br />to the dispatcher</div>"]
+        style 6 fill:#b3d9ff,stroke:#7d97b2,color:#000000
+      end
+
+      44[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json and<br />session.log under<br />Documents\InterviewRecordings</div>")]
+      style 44 fill:#85bbf0,stroke:#5d82a8,color:#000000
+    end
+
+    6-. "<div>Plays back the recording</div><div style='font-size: 70%'>[NAudio WaveOutEvent]</div>" .->2
+    6-. "<div>Reads the merged file for<br />playback</div><div style='font-size: 70%'>[File read]</div>" .->44
+
+  end

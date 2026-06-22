@@ -13,13 +13,8 @@ graph LR
     4("<div style='font-weight: bold'>Interview Recorder</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Desktop application for<br />recording and managing<br />interview audio with crash<br />recovery</div>")
     style 4 fill:#1168bd,stroke:#0b4884,color:#ffffff
 
-    4-. "<div>Converts chunks and<br />concatenates m4a</div><div style='font-size: 70%'>[Process.Start]</div>" .->3
-    4-. "<div>Plays back the recording</div><div style='font-size: 70%'>[NAudio WaveOutEvent]</div>" .->2
-    2-. "<div>Delivers captured audio</div><div style='font-size: 70%'>[NAudio callback]</div>" .->4
-    3-. "<div>Writes compressed files</div><div style='font-size: 70%'>[File I/O]</div>" .->4
     1-. "<div>Records interviews using</div><div style='font-size: 70%'>[WPF UI]</div>" .->4
     4-. "<div>Uses audio devices from</div><div style='font-size: 70%'>[NAudio API]</div>" .->2
     4-. "<div>Compresses audio using</div><div style='font-size: 70%'>[Command-line execution]</div>" .->3
-    4-. "<div>Displays information to</div><div style='font-size: 70%'>[UI Updates]</div>" .->1
 
   end
