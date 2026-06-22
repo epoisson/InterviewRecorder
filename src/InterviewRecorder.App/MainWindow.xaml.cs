@@ -19,7 +19,7 @@ namespace InterviewRecorder
 {
     public partial class MainWindow : Window
     {
-        private RecordingOrchestrator _orchestrator = null!;
+        private IRecorder _orchestrator = null!;
         private DispatcherTimer _durationTimer = null!;
         private bool _isInitialized = false;
 

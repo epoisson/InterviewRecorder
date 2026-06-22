@@ -15,7 +15,7 @@ namespace InterviewRecorder.Services
     /// Drives the <see cref="AudioCaptureEngine"/> and <see cref="FFmpegService"/>, tracks session
     /// state, and exposes log, state-change, and audio-level events for the UI.
     /// </summary>
-    public class RecordingOrchestrator : IDisposable
+    public class RecordingOrchestrator : IRecorder
     {
         private readonly AudioCaptureEngine _audioCapture;
         private readonly FileManager _fileManager;
