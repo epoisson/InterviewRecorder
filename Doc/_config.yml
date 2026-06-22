@@ -1,0 +1,19 @@
+title: Interview Recorder
+description: Windows audio interview recorder — architecture and design documentation.
+theme: jekyll-theme-cayman
+
+# jekyll-relative-links rewrites links to local .md files so they resolve to the
+# generated pages instead of 404ing. It is a default GitHub Pages plugin.
+plugins:
+  - jekyll-relative-links
+
+relative_links:
+  enabled: true
+  collections: true
+
+# Model sources and tooling artefacts are not part of the published site.
+# The static Structurizr export under static/ is kept and served as-is.
+exclude:
+  - workspace.dsl
+  - workspace.json
+  - .structurizr

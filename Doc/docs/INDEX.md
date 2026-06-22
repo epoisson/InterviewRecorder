@@ -2,10 +2,10 @@
 
 ## Where to start
 
-- [../../README.md](../../README.md) - overview, features, build/run, configuration reference.
+- [README](https://github.com/epoisson/InterviewRecorder/blob/main/README.md) - overview, features, build/run, configuration reference.
 - [ARCHITECTURE.md](ARCHITECTURE.md) - the current design: capture, chunking, compression queue, stop/merge, UI, threading, and recovery. This is the authoritative description.
 - [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - developer quick reference (flows, config, components).
-- [../workspace.dsl](../workspace.dsl) - C4 model (Structurizr DSL): context, container, component, and dynamic views.
+- [workspace.dsl](https://github.com/epoisson/InterviewRecorder/blob/main/Doc/workspace.dsl) - C4 model (Structurizr DSL): context, container, component, and dynamic views.
 
 ## Viewing the C4 diagrams
 
