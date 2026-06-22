@@ -77,6 +77,7 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             mainWindow -> irecorder "Drives recording (start/pause/resume/stop, recover)" "Method calls"
             recordingOrchestrator -> mainWindow "Raises state, log, level, chunk and conversion events" "Events"
             mainWindow -> windowsOS "Plays back the recording" "NAudio WaveOutEvent"
+            mainWindow -> fileSystem "Reads the merged file for playback" "File read"
 
             microphoneCapture -> windowsOS "Captures from device" "NAudio WaveInEvent"
             loopbackCapture -> windowsOS "Captures loopback" "NAudio WasapiLoopbackCapture"
@@ -96,6 +97,7 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             app -> core "Drives recording via IRecorder" "Method calls"
             core -> app "Raises state / level / chunk events" "Events"
             app -> windowsOS "Plays back recordings" "NAudio WaveOutEvent"
+            app -> fileSystem "Reads merged recording for playback" "File read"
             core -> windowsOS "Captures and stops audio" "NAudio (WaveIn / WASAPI)"
             windowsOS -> core "Delivers captured audio" "NAudio callbacks"
             core -> ffmpeg "Converts and merges audio" "Process execution"
@@ -174,6 +176,24 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             autoLayout lr
         }
 
+        dynamic interviewRecorder "Pause" "Pause Recording" {
+            user -> app "1. Click Pause"
+            app -> core "2. PauseRecordingAsync()"
+            core -> windowsOS "3. Stop capture; close current chunk"
+            core -> ffmpeg "4. Queue closed chunk for conversion"
+            app -> user "5. Show paused"
+            autoLayout lr
+        }
+
+        dynamic interviewRecorder "Resume" "Resume Recording" {
+            user -> app "1. Click Resume"
+            app -> core "2. ResumeRecordingAsync()"
+            core -> fileSystem "3. Open the next chunk"
+            core -> windowsOS "4. Restart capture"
+            app -> user "5. Show recording state"
+            autoLayout lr
+        }
+
         dynamic interviewRecorder "AudioDataFlow" "Audio Data Flow" {
             windowsOS -> core "1. Audio data available (real time)"
             core -> fileSystem "2. Write bytes to current chunk"
@@ -190,6 +210,14 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
             core -> ffmpeg "4. Drain conversions"
             core -> fileSystem "5. Merge WAV + write final m4a"
             app -> user "6. Show completion"
+            autoLayout lr
+        }
+
+        dynamic interviewRecorder "Play" "Play Recording" {
+            user -> app "1. Click Play"
+            app -> fileSystem "2. Read the merged WAV"
+            app -> windowsOS "3. Play audio and meter the waveform"
+            app -> user "4. Show playback / live waveform"
             autoLayout lr
         }
 

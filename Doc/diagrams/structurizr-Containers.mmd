@@ -30,6 +30,7 @@ graph LR
     5-. "<div>Drives recording via<br />IRecorder</div><div style='font-size: 70%'>[Method calls]</div>" .->7
     7-. "<div>Raises state / level / chunk<br />events</div><div style='font-size: 70%'>[Events]</div>" .->5
     5-. "<div>Plays back recordings</div><div style='font-size: 70%'>[NAudio WaveOutEvent]</div>" .->2
+    5-. "<div>Reads merged recording for<br />playback</div><div style='font-size: 70%'>[File read]</div>" .->42
     7-. "<div>Captures and stops audio</div><div style='font-size: 70%'>[NAudio (WaveIn / WASAPI)]</div>" .->2
     2-. "<div>Delivers captured audio</div><div style='font-size: 70%'>[NAudio callbacks]</div>" .->7
     7-. "<div>Converts and merges audio</div><div style='font-size: 70%'>[Process execution]</div>" .->3

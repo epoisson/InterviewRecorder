@@ -17,8 +17,11 @@ graph LR
         style 6 fill:#b3d9ff,stroke:#7d97b2,color:#000000
       end
 
+      42[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json and<br />session.log under<br />Documents\InterviewRecordings</div>")]
+      style 42 fill:#85bbf0,stroke:#5d82a8,color:#000000
     end
 
     6-. "<div>Plays back the recording</div><div style='font-size: 70%'>[NAudio WaveOutEvent]</div>" .->2
+    6-. "<div>Reads the merged file for<br />playback</div><div style='font-size: 70%'>[File read]</div>" .->42
 
   end
