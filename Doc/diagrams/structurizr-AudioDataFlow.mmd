@@ -1,47 +1,29 @@
 graph LR
   linkStyle default fill:#ffffff
 
-  subgraph diagram ["Dynamic View: Interview Recorder - WPF Application"]
+  subgraph diagram ["Dynamic View: Interview Recorder"]
     style diagram fill:#ffffff,stroke:#ffffff
-
-    2("<div style='font-weight: bold'>Windows Operating System</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Provides audio device access<br />and file system</div>")
-    style 2 fill:#999999,stroke:#6b6b6b,color:#ffffff
-    3("<div style='font-weight: bold'>FFmpeg</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>External audio processing<br />tool for compression and<br />format conversion</div>")
-    style 3 fill:#999999,stroke:#6b6b6b,color:#ffffff
 
     subgraph 4 ["Interview Recorder"]
       style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
 
-      subgraph 5 ["WPF Application"]
-        style 5 fill:#ffffff,stroke:#2e6295,color:#2e6295
-
-        14["<div style='font-weight: bold'>FFmpegService</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Background queue converting<br />chunks to m4a; merges m4a<br />chunks on stop</div>"]
-        style 14 fill:#ffe66d,stroke:#b2a14c,color:#000000
-        15["<div style='font-weight: bold'>MicrophoneCapture</div><div style='font-size: 70%; margin-top: 0px'>[Component: IAudioCapture Implementation]</div><div style='font-size: 80%; margin-top:10px'>Captures audio from<br />microphone</div>"]
-        style 15 fill:#95e1d3,stroke:#689d93,color:#000000
-        7["<div style='font-weight: bold'>RecordingOrchestrator</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Coordinates all recording<br />operations and manages<br />application state</div>"]
-        style 7 fill:#ff6b6b,stroke:#b24a4a,color:#ffffff
-        8["<div style='font-weight: bold'>AudioCaptureEngine</div><div style='font-size: 70%; margin-top: 0px'>[Component: Service]</div><div style='font-size: 80%; margin-top:10px'>Writes WAV chunks from<br />capture events, rotates<br />chunks, queues each for<br />conversion, raises peak<br />levels</div>"]
-        style 8 fill:#4ecdc4,stroke:#368f89,color:#000000
-      end
-
-      53[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json, and<br />session.log under<br />Documents\InterviewRecordings</div>")]
-      style 53 fill:#85bbf0,stroke:#5d82a8,color:#000000
+      42[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json and<br />session.log under<br />Documents\InterviewRecordings</div>")]
+      style 42 fill:#85bbf0,stroke:#5d82a8,color:#000000
+      5["<div style='font-weight: bold'>Desktop UI</div><div style='font-size: 70%; margin-top: 0px'>[Container: C# .NET 9, WPF]</div><div style='font-size: 80%; margin-top:10px'>WPF front-end: menu,<br />controls, live waveform,<br />chunks grid, in-app playback</div>"]
+      style 5 fill:#438dd5,stroke:#2e6295,color:#ffffff
+      7("<div style='font-weight: bold'>Recording Core</div><div style='font-size: 70%; margin-top: 0px'>[Container: C# .NET 9 class library]</div><div style='font-size: 80%; margin-top:10px'>Reusable recording engine,<br />capture modes, persistence<br />and configuration</div>")
+      style 7 fill:#2f6f4f,stroke:#204d37,color:#ffffff
     end
 
     2("<div style='font-weight: bold'>Windows Operating System</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Provides audio device access<br />and file system</div>")
     style 2 fill:#999999,stroke:#6b6b6b,color:#ffffff
     3("<div style='font-weight: bold'>FFmpeg</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>External audio processing<br />tool for compression and<br />format conversion</div>")
     style 3 fill:#999999,stroke:#6b6b6b,color:#ffffff
-    53[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json, and<br />session.log under<br />Documents\InterviewRecordings</div>")]
-    style 53 fill:#85bbf0,stroke:#5d82a8,color:#000000
 
-    2-. "<div>1. 1. Audio data available<br />(real time)</div><div style='font-size: 70%'>[NAudio callback]</div>" .->15
-    15-. "<div>2. 2. DataAvailable event</div><div style='font-size: 70%'>[Event]</div>" .->8
-    8-. "<div>3. 3. Write bytes to current<br />chunk</div><div style='font-size: 70%'>[WaveFileWriter]</div>" .->53
-    8-. "<div>4. 4. Raise peak level<br />(waveform)</div><div style='font-size: 70%'>[AudioPeak event]</div>" .->7
-    8-. "<div>5. 5. On rotation: queue<br />closed chunk</div><div style='font-size: 70%'>[Async calls]</div>" .->14
-    14-. "<div>6. 6. Convert chunk to m4a</div><div style='font-size: 70%'>[Process.Start]</div>" .->3
-    3-. "<div>7. 7. Write m4a chunk</div><div style='font-size: 70%'>[File I/O]</div>" .->53
+    2-. "<div>1. 1. Audio data available<br />(real time)</div><div style='font-size: 70%'>[NAudio callbacks]</div>" .->7
+    7-. "<div>2. 2. Write bytes to current<br />chunk</div><div style='font-size: 70%'>[File I/O]</div>" .->42
+    7-. "<div>3. 3. Raise peak level<br />(waveform)</div><div style='font-size: 70%'>[Events]</div>" .->5
+    7-. "<div>4. 4. On rotation: convert<br />closed chunk</div><div style='font-size: 70%'>[Process execution]</div>" .->3
+    3-. "<div>5. 5. Write m4a chunk</div><div style='font-size: 70%'>[File I/O]</div>" .->42
 
   end
