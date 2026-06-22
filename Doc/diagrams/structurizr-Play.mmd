@@ -7,8 +7,8 @@ graph LR
     subgraph 4 ["Interview Recorder"]
       style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
 
-      42[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json and<br />session.log under<br />Documents\InterviewRecordings</div>")]
-      style 42 fill:#85bbf0,stroke:#5d82a8,color:#000000
+      44[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json and<br />session.log under<br />Documents\InterviewRecordings</div>")]
+      style 44 fill:#85bbf0,stroke:#5d82a8,color:#000000
       5["<div style='font-weight: bold'>Desktop UI</div><div style='font-size: 70%; margin-top: 0px'>[Container: C# .NET 9, WPF]</div><div style='font-size: 80%; margin-top:10px'>WPF front-end: menu,<br />controls, live waveform,<br />chunks grid, in-app playback</div>"]
       style 5 fill:#438dd5,stroke:#2e6295,color:#ffffff
     end
@@ -19,7 +19,7 @@ graph LR
     style 2 fill:#999999,stroke:#6b6b6b,color:#ffffff
 
     1-. "<div>1. 1. Click Play</div><div style='font-size: 70%'>[Mouse / keyboard]</div>" .->5
-    5-. "<div>2. 2. Read the merged WAV</div><div style='font-size: 70%'>[File read]</div>" .->42
+    5-. "<div>2. 2. Read the merged WAV</div><div style='font-size: 70%'>[File read]</div>" .->44
     5-. "<div>3. 3. Play audio and meter<br />the waveform</div><div style='font-size: 70%'>[NAudio WaveOutEvent]</div>" .->2
     5-. "<div>4. 4. Show playback / live<br />waveform</div><div style='font-size: 70%'>[UI]</div>" .->1
 

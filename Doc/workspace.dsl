@@ -34,6 +34,7 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
                 logManager = component "LogManager" "Session logging" "Service" "Core"
                 configManager = component "ConfigurationManager" "Loads, validates, watches and saves configuration" "Service" "Core"
                 ffmpegService = component "FFmpegService" "Background queue converting chunks to m4a; merges m4a chunks on stop" "Service" "Integration"
+                iaudiocapture = component "IAudioCapture" "Capture-source abstraction: raises DataAvailable and exposes the capture format" "C# interface" "Contract"
                 microphoneCapture = component "MicrophoneCapture" "Captures audio from microphone" "IAudioCapture Implementation" "Audio"
                 loopbackCapture = component "LoopbackCapture" "Captures system audio via loopback" "IAudioCapture Implementation" "Audio"
                 recordingSession = component "RecordingSession" "Session state and metadata" "Data Model" "Model"
@@ -52,12 +53,13 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
                 recordingOrchestrator -> ffmpegService "Manages and drains conversion" "Async methods"
 
                 # Capture engine
-                audioCaptureEngine -> microphoneCapture "Creates and controls" "Factory"
-                audioCaptureEngine -> loopbackCapture "Creates and controls" "Factory"
+                audioCaptureEngine -> iaudiocapture "Creates and controls (per capture mode)" "Factory"
+                microphoneCapture -> iaudiocapture "Implements" "C# interface"
+                loopbackCapture -> iaudiocapture "Implements" "C# interface"
+                iaudiocapture -> audioCaptureEngine "Raises DataAvailable / RecordingStopped" "Events"
                 audioCaptureEngine -> fileManager "Gets chunk paths" "Direct calls"
                 audioCaptureEngine -> ffmpegService "Queues each closed chunk" "Async calls"
                 audioCaptureEngine -> recordingOrchestrator "Raises peak/chunk events" "Events"
-                microphoneCapture -> audioCaptureEngine "Forwards audio (DataAvailable)" "Event"
 
                 # Persistence / recovery / config
                 fileManager -> recordingSession "Reads chunk list" "Property access"
@@ -81,12 +83,14 @@ workspace "Interview Recorder" "C4 Model for Interview Audio Recorder Applicatio
 
             microphoneCapture -> windowsOS "Captures from device" "NAudio WaveInEvent"
             loopbackCapture -> windowsOS "Captures loopback" "NAudio WasapiLoopbackCapture"
-            windowsOS -> microphoneCapture "Delivers captured audio" "NAudio callback"
+            windowsOS -> iaudiocapture "Delivers captured audio" "NAudio callback"
             audioCaptureEngine -> windowsOS "Stops audio capture" "NAudio API"
             ffmpegService -> ffmpeg "Converts chunks and concatenates m4a" "Process.Start"
 
             audioCaptureEngine -> fileSystem "Writes chunk audio" "WaveFileWriter"
             fileManager -> fileSystem "Reads and writes files" "File I/O"
+            stateManager -> fileSystem "Writes metadata.json" "File I/O"
+            logManager -> fileSystem "Writes session.log" "File I/O"
             ffmpegService -> fileSystem "Writes converted and merged files" "File I/O"
             ffmpeg -> fileSystem "Writes compressed files" "File I/O"
             configManager -> configStorage "Reads, saves and watches settings" "File I/O + FileSystemWatcher"

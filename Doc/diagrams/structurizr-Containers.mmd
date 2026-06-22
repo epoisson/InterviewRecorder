@@ -14,27 +14,27 @@ graph LR
     subgraph 4 ["Interview Recorder"]
       style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
 
-      42[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json and<br />session.log under<br />Documents\InterviewRecordings</div>")]
-      style 42 fill:#85bbf0,stroke:#5d82a8,color:#000000
-      43["<div style='font-weight: bold'>Configuration Storage</div><div style='font-size: 70%; margin-top: 0px'>[Container: JSON File]</div><div style='font-size: 80%; margin-top:10px'>appsettings.json (capture,<br />chunking, compression<br />settings)</div>"]
-      style 43 fill:#ffa500,stroke:#b27300,color:#000000
+      44[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json and<br />session.log under<br />Documents\InterviewRecordings</div>")]
+      style 44 fill:#85bbf0,stroke:#5d82a8,color:#000000
+      45["<div style='font-weight: bold'>Configuration Storage</div><div style='font-size: 70%; margin-top: 0px'>[Container: JSON File]</div><div style='font-size: 80%; margin-top:10px'>appsettings.json (capture,<br />chunking, compression<br />settings)</div>"]
+      style 45 fill:#ffa500,stroke:#b27300,color:#000000
       5["<div style='font-weight: bold'>Desktop UI</div><div style='font-size: 70%; margin-top: 0px'>[Container: C# .NET 9, WPF]</div><div style='font-size: 80%; margin-top:10px'>WPF front-end: menu,<br />controls, live waveform,<br />chunks grid, in-app playback</div>"]
       style 5 fill:#438dd5,stroke:#2e6295,color:#ffffff
       7("<div style='font-weight: bold'>Recording Core</div><div style='font-size: 70%; margin-top: 0px'>[Container: C# .NET 9 class library]</div><div style='font-size: 80%; margin-top:10px'>Reusable recording engine,<br />capture modes, persistence<br />and configuration</div>")
       style 7 fill:#2f6f4f,stroke:#204d37,color:#ffffff
     end
 
-    3-. "<div>Writes compressed files</div><div style='font-size: 70%'>[File I/O]</div>" .->42
+    3-. "<div>Writes compressed files</div><div style='font-size: 70%'>[File I/O]</div>" .->44
     1-. "<div>Records / plays back<br />interviews</div><div style='font-size: 70%'>[Mouse / keyboard]</div>" .->5
     5-. "<div>Displays status, waveform and<br />chunks</div><div style='font-size: 70%'>[UI]</div>" .->1
     5-. "<div>Drives recording via<br />IRecorder</div><div style='font-size: 70%'>[Method calls]</div>" .->7
     7-. "<div>Raises state / level / chunk<br />events</div><div style='font-size: 70%'>[Events]</div>" .->5
     5-. "<div>Plays back recordings</div><div style='font-size: 70%'>[NAudio WaveOutEvent]</div>" .->2
-    5-. "<div>Reads merged recording for<br />playback</div><div style='font-size: 70%'>[File read]</div>" .->42
+    5-. "<div>Reads merged recording for<br />playback</div><div style='font-size: 70%'>[File read]</div>" .->44
     7-. "<div>Captures and stops audio</div><div style='font-size: 70%'>[NAudio (WaveIn / WASAPI)]</div>" .->2
     2-. "<div>Delivers captured audio</div><div style='font-size: 70%'>[NAudio callbacks]</div>" .->7
     7-. "<div>Converts and merges audio</div><div style='font-size: 70%'>[Process execution]</div>" .->3
-    7-. "<div>Reads and writes recordings</div><div style='font-size: 70%'>[File I/O]</div>" .->42
-    7-. "<div>Reads, saves and watches<br />settings</div><div style='font-size: 70%'>[File I/O]</div>" .->43
+    7-. "<div>Reads and writes recordings</div><div style='font-size: 70%'>[File I/O]</div>" .->44
+    7-. "<div>Reads, saves and watches<br />settings</div><div style='font-size: 70%'>[File I/O]</div>" .->45
 
   end

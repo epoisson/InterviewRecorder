@@ -7,8 +7,8 @@ graph LR
     subgraph 4 ["Interview Recorder"]
       style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
 
-      42[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json and<br />session.log under<br />Documents\InterviewRecordings</div>")]
-      style 42 fill:#85bbf0,stroke:#5d82a8,color:#000000
+      44[("<div style='font-weight: bold'>File System</div><div style='font-size: 70%; margin-top: 0px'>[Container: Windows File System]</div><div style='font-size: 80%; margin-top:10px'>Stores chunk + merged WAV/m4a<br />files, metadata.json and<br />session.log under<br />Documents\InterviewRecordings</div>")]
+      style 44 fill:#85bbf0,stroke:#5d82a8,color:#000000
       5["<div style='font-weight: bold'>Desktop UI</div><div style='font-size: 70%; margin-top: 0px'>[Container: C# .NET 9, WPF]</div><div style='font-size: 80%; margin-top:10px'>WPF front-end: menu,<br />controls, live waveform,<br />chunks grid, in-app playback</div>"]
       style 5 fill:#438dd5,stroke:#2e6295,color:#ffffff
       7("<div style='font-weight: bold'>Recording Core</div><div style='font-size: 70%; margin-top: 0px'>[Container: C# .NET 9 class library]</div><div style='font-size: 80%; margin-top:10px'>Reusable recording engine,<br />capture modes, persistence<br />and configuration</div>")
@@ -23,7 +23,7 @@ graph LR
     1-. "<div>1. 1. Click Start Recording</div><div style='font-size: 70%'>[Mouse / keyboard]</div>" .->5
     5-. "<div>2. 2. StartRecordingAsync()</div><div style='font-size: 70%'>[Method calls]</div>" .->7
     7-. "<div>3. 3. Start capturing audio</div><div style='font-size: 70%'>[NAudio (WaveIn / WASAPI)]</div>" .->2
-    7-. "<div>4. 4. Create first chunk</div><div style='font-size: 70%'>[File I/O]</div>" .->42
+    7-. "<div>4. 4. Create first chunk</div><div style='font-size: 70%'>[File I/O]</div>" .->44
     5-. "<div>5. 5. Show recording state</div><div style='font-size: 70%'>[UI]</div>" .->1
 
   end
