@@ -47,6 +47,7 @@ namespace InterviewRecorder.Services
 
                 _isRunning = true;
                 _drainAndStop = false;
+                _cancellationTokenSource.Dispose(); // dispose the previous CTS before replacing it
                 _cancellationTokenSource = new CancellationTokenSource();
                 _conversionWorker = Task.Run(() => ProcessConversionQueue(_cancellationTokenSource.Token));
             }
@@ -205,9 +206,9 @@ namespace InterviewRecorder.Services
 
                 using (var process = new Process { StartInfo = startInfo })
                 {
-                    var errorOutput = string.Empty;
-                    process.ErrorDataReceived += (s, e) => errorOutput += e.Data;
-                    
+                    var errorOutput = new StringBuilder();
+                    process.ErrorDataReceived += (s, e) => { if (e.Data != null) errorOutput.AppendLine(e.Data); };
+
                     process.Start();
                     process.BeginErrorReadLine();
                     

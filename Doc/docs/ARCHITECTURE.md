@@ -59,7 +59,9 @@ Pause and stop both close the current chunk and queue it for conversion. Resume 
 
 ## Waveform
 
-The engine raises `AudioPeak` with a normalised 0..1 peak, a few times per buffer, so the strip scrolls smoothly. `RecordingOrchestrator` re-raises this as `AudioLevel`. During playback the UI taps the player with a `MeteringSampleProvider` and uses its `StreamVolume` peaks. Both feed the same rolling buffer in `MainWindow`, rendered as a filled polygon.
+The engine raises `AudioPeak` with a normalised 0..1 peak, a few times per buffer, so the strip scrolls smoothly. `RecordingOrchestrator` re-raises this as `AudioLevel`. During playback the UI taps the player with a `MeteringSampleProvider` and uses its `StreamVolume` peaks. Both feed the same rolling buffer in `MainWindow` (capped at 220 points), rendered as a filled polygon.
+
+Peaks arrive ~40x/sec, so the UI marshals them with `Dispatcher.BeginInvoke` (non-blocking, to avoid stalling the audio thread) and coalesces the redraw to ~30 fps rather than rebuilding the polygon per sample.
 
 ## Threading model
 
@@ -71,7 +73,7 @@ The engine raises `AudioPeak` with a normalised 0..1 peak, a few times per buffe
 | Chunk writes | serialised by `_chunkLock` in the engine |
 | Log file writes | serialised by a `SemaphoreSlim` in `LogManager` |
 
-Cross-thread UI updates (waveform, log, state) marshal back via `Dispatcher.Invoke`.
+Cross-thread UI updates marshal back via the dispatcher: state and log with `Dispatcher.Invoke`, the high-frequency waveform peaks with `Dispatcher.BeginInvoke`. The log `TextBox` is capped (oldest lines trimmed) so a long session can't grow it without bound.
 
 ## Configuration
 

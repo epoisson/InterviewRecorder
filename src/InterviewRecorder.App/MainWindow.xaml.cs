@@ -29,6 +29,12 @@ namespace InterviewRecorder
 
         private const int MaxPeaks = 220;
         private readonly List<float> _peaks = new();
+        private DateTime _lastWaveformRender = DateTime.MinValue;
+
+        // Cap the log box so a long session can't grow it without bound. Trim in slack-sized
+        // batches so we don't rebuild the text on every single append.
+        private const int MaxLogLines = 500;
+        private const int LogTrimSlack = 100;
 
         private readonly ObservableCollection<Models.ChunkInfo> _chunks = new();
 
@@ -157,7 +163,26 @@ namespace InterviewRecorder
         {
             var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
             LogTextBox.AppendText($"[{timestamp}] {message}\n");
+            TrimLog();
             LogTextBox.ScrollToEnd();
+        }
+
+        // Keep the log box bounded over long sessions: once it overshoots the cap by the slack,
+        // drop the oldest lines back down to the cap.
+        private void TrimLog()
+        {
+            if (LogTextBox.LineCount <= MaxLogLines + LogTrimSlack) return;
+
+            var text = LogTextBox.Text;
+            int linesToRemove = LogTextBox.LineCount - MaxLogLines;
+            int idx = 0;
+            for (int i = 0; i < linesToRemove; i++)
+            {
+                int nl = text.IndexOf('\n', idx);
+                if (nl < 0) break;
+                idx = nl + 1;
+            }
+            if (idx > 0) LogTextBox.Text = text.Substring(idx);
         }
 
         private void UpdateUIState()
@@ -444,7 +469,7 @@ namespace InterviewRecorder
             foreach (var v in e.MaxSampleValues)
                 if (v > peak) peak = v;
 
-            Dispatcher.Invoke(() => AddPeak(peak));
+            Dispatcher.BeginInvoke(() => AddPeak(peak));
         }
 
         private void StopPlayback()
@@ -466,8 +491,9 @@ namespace InterviewRecorder
 
         private void OnAudioLevel(float peak)
         {
-            // Raised from capture threads; marshal to the UI.
-            Dispatcher.Invoke(() => AddPeak(peak));
+            // Raised ~40x/sec from capture threads. BeginInvoke (non-blocking) so we never
+            // stall the audio thread on the UI; AddPeak throttles the actual redraw.
+            Dispatcher.BeginInvoke(() => AddPeak(peak));
         }
 
         private void AddPeak(float peak)
@@ -476,12 +502,18 @@ namespace InterviewRecorder
             if (_peaks.Count > MaxPeaks)
                 _peaks.RemoveRange(0, _peaks.Count - MaxPeaks);
 
+            // Coalesce redraws to ~30 fps; peaks still accumulate, we just don't rebuild the
+            // PointCollection on every single sample.
+            var now = DateTime.Now;
+            if ((now - _lastWaveformRender).TotalMilliseconds < 33) return;
+            _lastWaveformRender = now;
             RenderWaveform();
         }
 
         private void ClearWaveform()
         {
             _peaks.Clear();
+            _lastWaveformRender = DateTime.MinValue;
             WaveformShape.Points = new PointCollection();
         }
 
